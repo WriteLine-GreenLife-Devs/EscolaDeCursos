@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EscolaDeCursosWebApp.Compartilhado.Infra.Orm.Config;
 
-public sealed class ProfessorPerfilConfiguration
-    : IEntityTypeConfiguration<ProfessorPerfil>
+public sealed class ProfessorConfiguration
+    : IEntityTypeConfiguration<Professor>
 {
     public void Configure(
-        EntityTypeBuilder<ProfessorPerfil> builder)
+        EntityTypeBuilder<Professor> builder)
     {
         builder.ToTable("TBProfessorPerfil");
 
@@ -32,7 +32,7 @@ public sealed class ProfessorPerfilConfiguration
 
         builder.HasOne(p => p.Usuario)
             .WithOne()
-            .HasForeignKey<ProfessorPerfil>(p => p.Id)
+            .HasForeignKey<Professor>(p => p.Id)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName(
                 "FK_TBProfessorPerfil_TBUsuario"

@@ -108,6 +108,18 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
         };
     }
 
+    public TurmaDetalheDto? ObterDetalhesTurmaDoProfessor(
+        Guid turmaId,
+        Guid professorId)
+    {
+        Turma? turma = repositorioTurma.SelecionarPorId(turmaId);
+
+        if (turma == null || turma.instrutorId != professorId)
+            return null;
+
+        return ObterDetalhesTurma(turmaId);
+    }
+
     public FichaNotasDto? ObterFichaNotas(Guid matriculaId)
     {
         var matricula = repositorioMatricula.SelecionarPorId(matriculaId);

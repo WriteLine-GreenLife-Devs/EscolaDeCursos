@@ -95,3 +95,14 @@ public sealed class ExcluirTurmaDto
     public string CursoNome { get; set; } = string.Empty;
     public string InstrutorNome { get; set; } = string.Empty;
 }
+
+public sealed record TurmaProfessorDto(
+    Guid Id,
+    string Nome,
+    string CursoNome,
+    DateTime DataInicio,
+    DateTime DataFim,
+    string HorarioTurno,
+    StatusTurma Status,
+    int TotalAlunos
+);

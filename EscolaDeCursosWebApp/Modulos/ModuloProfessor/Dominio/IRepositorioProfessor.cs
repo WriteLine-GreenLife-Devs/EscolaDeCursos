@@ -3,11 +3,11 @@ using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
 
-public interface IRepositorioProfessorPerfil
-    : IRepositorio<ProfessorPerfil>
+public interface IRepositorioProfessor
+    : IRepositorio<Professor>
 {
     void CadastrarProfessor(
         Usuario usuario,
-        ProfessorPerfil perfil
+        Professor professor
     );
 }

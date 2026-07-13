@@ -1,0 +1,80 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao.PainelProfessorViewModel
+
+@{
+    Layout = "_LayoutPaginaInicial";
+    ViewBag.Titulo = "Área do Professor";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Minhas turmas</h1>
+
+            <p class="text-secondary mb-0">
+                Bem-vindo, @Model.NomeProfessor.
+            </p>
+        </div>
+
+        <form action="/ModuloUsuario/Apresentacao/Logout" method="post">
+            <button type="submit" class="btn btn-outline-danger">
+                Sair
+            </button>
+        </form>
+    </div>
+
+    @if (Model.Turmas.Count == 0)
+    {
+        <div class="alert alert-info">
+            Você ainda não está vinculado a nenhuma turma.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var turma in Model.Turmas)
+            {
+                <div class="col-md-6 col-xl-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h2 class="h5">
+                                @turma.Nome
+                            </h2>
+
+                            <p class="text-secondary">
+                                @turma.CursoNome
+                            </p>
+
+                            <dl class="row small mb-3">
+                                <dt class="col-5">Período</dt>
+                                <dd class="col-7">
+                                    @turma.DataInicio.ToString("dd/MM/yyyy")
+                                    até
+                                    @turma.DataFim.ToString("dd/MM/yyyy")
+                                </dd>
+
+                                <dt class="col-5">Horário</dt>
+                                <dd class="col-7">
+                                    @turma.HorarioTurno
+                                </dd>
+
+                                <dt class="col-5">Situação</dt>
+                                <dd class="col-7">
+                                    @turma.Status
+                                </dd>
+
+                                <dt class="col-5">Alunos</dt>
+                                <dd class="col-7">
+                                    @turma.TotalAlunos
+                                </dd>
+                            </dl>
+
+                            <a asp-action="DetalhesTurma" asp-route-id="@turma.Id" class="btn btn-primary">
+                                Ver alunos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

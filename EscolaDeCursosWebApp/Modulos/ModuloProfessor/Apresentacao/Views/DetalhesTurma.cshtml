@@ -1,0 +1,65 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao.DetalhesTurmaProfessorViewModel
+
+@{
+    Layout = "_LayoutPaginaInicial";
+    ViewBag.Titulo = "Alunos da Turma";
+}
+
+<div class="container py-5">
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary mb-3">
+            Voltar
+        </a>
+
+        <h1 class="h3 mb-1">
+            @Model.TurmaNome
+        </h1>
+
+        <p class="text-secondary">
+            @Model.Alunos.Count aluno(s) de
+            @Model.VagasMaximas vaga(s).
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (Model.Alunos.Count == 0)
+            {
+                <div class="alert alert-info mb-0">
+                    Esta turma ainda não possui alunos
+                    matriculados.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Aluno</th>
+                                <th>Data da matrícula</th>
+                                <th>Situação</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var aluno in Model.Alunos)
+                            {
+                                <tr>
+                                    <td>@aluno.Nome</td>
+
+                                    <td>
+                                        @aluno.DataMatricula
+                                        .ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>@aluno.Situacao</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

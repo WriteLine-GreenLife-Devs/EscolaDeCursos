@@ -16,7 +16,7 @@ public sealed class EscolaDeCursosDbContext(DbContextOptions<EscolaDeCursosDbCon
     public DbSet<Curso> Cursos => Set<Curso>();
     public DbSet<Turma> Turmas => Set<Turma>();
     public DbSet<Matricula> Matriculas => Set<Matricula>();
-    public DbSet<ProfessorPerfil> Professores => Set<ProfessorPerfil>();
+    public DbSet<Professor> Professores => Set<Professor>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

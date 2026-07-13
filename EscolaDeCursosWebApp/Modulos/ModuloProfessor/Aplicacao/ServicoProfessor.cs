@@ -6,13 +6,13 @@ using FluentResults;
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
 
 public sealed class ServicoProfessor
-    : ServicoBase<ProfessorPerfil>
+    : ServicoBase<Professor>
 {
-    private readonly IRepositorioProfessorPerfil repositorioProfessor;
+    private readonly IRepositorioProfessor repositorioProfessor;
     private readonly IRepositorioUsuario repositorioUsuario;
 
     public ServicoProfessor(
-        IRepositorioProfessorPerfil repositorioProfessor,
+        IRepositorioProfessor repositorioProfessor,
         IRepositorioUsuario repositorioUsuario)
     {
         this.repositorioProfessor = repositorioProfessor;
@@ -48,7 +48,7 @@ public sealed class ServicoProfessor
             );
         }
 
-        ProfessorPerfil? perfilExistente =
+        Professor? perfilExistente =
             repositorioProfessor.SelecionarPorId(dto.UsuarioId);
 
         if (perfilExistente != null)
@@ -59,7 +59,7 @@ public sealed class ServicoProfessor
             );
         }
 
-        var professor = new ProfessorPerfil(
+        var professor = new Professor(
             dto.UsuarioId,
             dto.Bio,
             dto.Especialidades,
@@ -79,7 +79,7 @@ public sealed class ServicoProfessor
 
     public Result Editar(EditarProfessorPerfilDto dto)
     {
-        ProfessorPerfil? perfilExistente =
+        Professor? perfilExistente =
             repositorioProfessor.SelecionarPorId(dto.Id);
 
         if (perfilExistente == null)
@@ -90,7 +90,7 @@ public sealed class ServicoProfessor
             );
         }
 
-        var perfilAtualizado = new ProfessorPerfil(
+        var perfilAtualizado = new Professor(
             dto.Id,
             dto.Bio,
             dto.Especialidades,
@@ -122,12 +122,12 @@ public sealed class ServicoProfessor
 
     public List<ListarProfessoresDto> SelecionarTodos()
     {
-        List<ProfessorPerfil> perfis =
+        List<Professor> perfis =
             repositorioProfessor.SelecionarTodos();
 
         var professores = new List<ListarProfessoresDto>();
 
-        foreach (ProfessorPerfil perfil in perfis)
+        foreach (Professor perfil in perfis)
         {
             Usuario? usuario =
                 repositorioUsuario.SelecionarPorId(perfil.Id);
@@ -145,7 +145,7 @@ public sealed class ServicoProfessor
 
     public DetalhesProfessorDto? SelecionarPorId(Guid id)
     {
-        ProfessorPerfil? perfil =
+        Professor? perfil =
             repositorioProfessor.SelecionarPorId(id);
 
         if (perfil == null)
@@ -161,7 +161,7 @@ public sealed class ServicoProfessor
     }
 
     private static ListarProfessoresDto MapearParaListagem(
-        ProfessorPerfil perfil,
+        Professor perfil,
         Usuario usuario)
     {
         return new ListarProfessoresDto(
@@ -174,7 +174,7 @@ public sealed class ServicoProfessor
     }
 
     private static DetalhesProfessorDto MapearParaDetalhes(
-        ProfessorPerfil perfil,
+        Professor perfil,
         Usuario usuario)
     {
         return new DetalhesProfessorDto(

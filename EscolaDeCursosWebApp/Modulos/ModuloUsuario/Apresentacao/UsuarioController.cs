@@ -52,14 +52,15 @@ public class UsuarioController(ServicoUsuario servicoUsuario, IMapper mapeador) 
     [HttpPost]
     public ActionResult Login(string Email, string Senha)
     {
-        if(string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha))
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha))
         {
-            ModelState.AddModelError(string.Empty, "Email e senha são obrigatórios.");
+            //ModelState.AddModelError(string.Empty, "Email e senha são obrigatórios.");
+            TempData["LoginError"] = "Email e senha são obrigatórios.";
             return RedirectToAction("Index", "Home");
         }
 
         var usuario = servicoUsuario.AutenticarUsuario(Email, Senha);
-        if(usuario == null)
+        if (usuario == null)
         {
             // credenciais inválidas
             TempData["LoginError"] = "Credenciais inválidas.";
@@ -79,12 +80,20 @@ public class UsuarioController(ServicoUsuario servicoUsuario, IMapper mapeador) 
 
         HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal).GetAwaiter().GetResult();
 
-        if(usuario.tipoUsuario == TipoUsuario.ADM)
+        return usuario.tipoUsuario switch
         {
-            return Redirect("/ModuloADM/Apresentacao/Index");
-        }
+            TipoUsuario.ADM =>
+                Redirect("/ModuloADM/Apresentacao/Index"),
 
-        return RedirectToAction("Index", "Home");
+            TipoUsuario.Professor =>
+                Redirect("/ModuloProfessor/Apresentacao/Index"),
+
+            TipoUsuario.Aluno =>
+                RedirectToAction("Index", "Home"),
+
+            _ =>
+                RedirectToAction("Index", "Home")
+        };
     }
 
     [HttpPost]

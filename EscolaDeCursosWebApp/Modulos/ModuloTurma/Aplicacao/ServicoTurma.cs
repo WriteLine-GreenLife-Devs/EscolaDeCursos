@@ -4,6 +4,7 @@ using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using FluentResults;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
@@ -13,16 +14,19 @@ public sealed class ServicoTurma : ServicoBase<Turma>
     private readonly IRepositorioTurma repositorioTurma;
     private readonly IRepositorioCurso repositorioCurso;
     private readonly IRepositorioUsuario repositorioUsuario;
+    private readonly IRepositorioMatricula repositorioMatricula;
 
     public ServicoTurma(
         IRepositorioTurma repositorioTurma,
         IRepositorioCurso repositorioCurso,
-        IRepositorioUsuario repositorioUsuario
+        IRepositorioUsuario repositorioUsuario,
+        IRepositorioMatricula repositorioMatricula
     )
     {
         this.repositorioTurma = repositorioTurma;
         this.repositorioCurso = repositorioCurso;
         this.repositorioUsuario = repositorioUsuario;
+        this.repositorioMatricula = repositorioMatricula;
     }
 
     public Result CadastrarTurma(CadastrarTurmaDto cadastrarTurmaDto)
@@ -90,5 +94,33 @@ public sealed class ServicoTurma : ServicoBase<Turma>
     public bool ExcluirTurma(Guid id)
     {
         return repositorioTurma.Excluir(id);
+    }
+
+    public List<TurmaProfessorDto> SelecionarPorProfessor(Guid professorId)
+    {
+        return repositorioTurma
+            .Filtrar(turma => turma.instrutorId == professorId)
+            .Select(turma =>
+            {
+                Curso? curso = repositorioCurso.SelecionarPorId(turma.cursoId);
+
+                int totalAlunos = repositorioMatricula
+                    .Filtrar(matricula =>
+                        matricula.TurmaId == turma.Id &&
+                        matricula.Situacao == SituacaoMatricula.Cursando)
+                    .Count;
+
+                return new TurmaProfessorDto(
+                    turma.Id,
+                    turma.nome,
+                    curso?.nome ?? "Curso não encontrado",
+                    turma.dataInicio,
+                    turma.dataFim,
+                    turma.HorarioTurno,
+                    turma.status,
+                    totalAlunos);
+            })
+            .OrderBy(turma => turma.DataInicio)
+            .ToList();
     }
 }

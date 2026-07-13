@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
 
@@ -63,4 +65,36 @@ public record DetalhesProfessorViewModel(
     string Bio,
     string Especialidades,
     DateTime DataContratacao
+);
+
+public sealed class PainelProfessorViewModel
+{
+    public string NomeProfessor { get; init; } = string.Empty;
+    public List<TurmaProfessorViewModel> Turmas { get; init; } = [];
+}
+
+public sealed record TurmaProfessorViewModel(
+    Guid Id,
+    string Nome,
+    string CursoNome,
+    DateTime DataInicio,
+    DateTime DataFim,
+    string HorarioTurno,
+    StatusTurma Status,
+    int TotalAlunos
+);
+
+public sealed class DetalhesTurmaProfessorViewModel
+{
+    public Guid TurmaId { get; init; }
+    public string TurmaNome { get; init; } = string.Empty;
+    public int VagasMaximas { get; init; }
+    public List<AlunoTurmaProfessorViewModel> Alunos { get; init; } = [];
+}
+
+public sealed record AlunoTurmaProfessorViewModel(
+    Guid MatriculaId,
+    string Nome,
+    DateTime DataMatricula,
+    SituacaoMatricula Situacao
 );

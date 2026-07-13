@@ -3,15 +3,15 @@ using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
 
-public sealed class ProfessorPerfil : EntidadeBase<ProfessorPerfil>
+public sealed class Professor : EntidadeBase<Professor>
 {
     public string Bio { get; set; } = string.Empty;
     public string Especialidades { get; set; } = string.Empty;
     public DateTime DataContratacao { get; set; }
     public Usuario Usuario { get; set; } = null!;
-    public ProfessorPerfil() { }
+    public Professor() { }
 
-    public ProfessorPerfil(
+    public Professor(
         Guid usuarioId,
         string bio,
         string especialidades,
@@ -23,7 +23,7 @@ public sealed class ProfessorPerfil : EntidadeBase<ProfessorPerfil>
         DataContratacao = dataContratacao.Date;
     }
 
-    public override void Atualizar(ProfessorPerfil entidadeAtualizada)
+    public override void Atualizar(Professor entidadeAtualizada)
     {
         Bio = entidadeAtualizada.Bio?.Trim() ?? string.Empty;
         Especialidades =
