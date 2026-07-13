@@ -1,0 +1,34 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloCategoria.Aplicacao.ExcluirCategoriaDto
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Excluir Categoria";
+}
+
+<form class="card border-danger-subtle shadow-sm mx-auto p-4" style="max-width: 620px;" asp-action="ExcluirCategoria" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="alert alert-warning" role="alert">
+        Tem certeza que deseja excluir esta categoria?
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Nome</label>
+        <input value="@Model.nome" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Descrição</label>
+        <textarea class="form-control" rows="4" disabled>@Model.descricao</textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Status</label>
+        <input value="@Model.status" class="form-control" disabled />
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="ListarCategorias">Voltar</a>
+        <button class="btn btn-danger rounded-pill px-4" type="submit">Excluir</button>
+    </div>
+</form>

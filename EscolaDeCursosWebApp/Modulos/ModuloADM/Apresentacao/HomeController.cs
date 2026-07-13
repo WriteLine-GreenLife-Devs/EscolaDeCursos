@@ -1,3 +1,5 @@
+using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using Microsoft.AspNetCore.Authorization;
@@ -7,12 +9,109 @@ namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 
 [Authorize(Roles = "ADM")]
 [Route("ModuloADM/Apresentacao/[action]")]
-public class ADMController(ServicoUsuario servicoUsuario, IRepositorioUsuario repositorioUsuario) : Controller
+public class ADMController(
+    ServicoUsuario servicoUsuario,
+    IRepositorioUsuario repositorioUsuario,
+    ServicoCategoria servicoCategoria,
+    IRepositorioCategoria repositorioCategoria
+) : Controller
 {
     [HttpGet]
     public ActionResult Index()
     {
         return View();
+    }
+
+    [HttpGet]
+    public ActionResult ListarCategorias()
+    {
+        var categorias = repositorioCategoria.SelecionarTodos()
+            .OrderBy(c => c.nome)
+            .ToList();
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Listar.cshtml", categorias);
+    }
+
+    [HttpGet]
+    public ActionResult CadastrarCategoria()
+    {
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Cadastrar.cshtml", new CadastrarCategoriaDto(string.Empty, string.Empty, StatusCategoria.Ativo));
+    }
+
+    [HttpPost]
+    public ActionResult CadastrarCategoria(CadastrarCategoriaDto cadastrarVm)
+    {
+        if (!ModelState.IsValid)
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Cadastrar.cshtml", cadastrarVm);
+
+        var resultado = servicoCategoria.CadastrarCategoria(cadastrarVm);
+
+        if (resultado.IsFailed)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Errors.First().Message);
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Cadastrar.cshtml", cadastrarVm);
+        }
+
+        return RedirectToAction("ListarCategorias");
+    }
+
+    [HttpGet]
+    public ActionResult EditarCategoria(Guid id)
+    {
+        var categoria = repositorioCategoria.SelecionarPorId(id);
+
+        if (categoria == null)
+            return NotFound();
+
+        var editarVm = new EditarCategoriaDto(
+            categoria.Id,
+            categoria.nome,
+            categoria.descricao,
+            categoria.status
+        );
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Editar.cshtml", editarVm);
+    }
+
+    [HttpPost]
+    public ActionResult EditarCategoria(Guid id, EditarCategoriaDto editarVm)
+    {
+        if (!ModelState.IsValid)
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Editar.cshtml", editarVm);
+
+        var resultado = servicoCategoria.EditarCategoria(id, editarVm);
+
+        if (resultado.IsFailed)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Errors.First().Message);
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Editar.cshtml", editarVm);
+        }
+
+        return RedirectToAction("ListarCategorias");
+    }
+
+    [HttpGet]
+    public ActionResult ExcluirCategoria(Guid id)
+    {
+        var categoria = repositorioCategoria.SelecionarPorId(id);
+
+        if (categoria == null)
+            return NotFound();
+
+        var excluirVm = new ExcluirCategoriaDto(categoria.Id, categoria.nome, categoria.descricao, categoria.status);
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/Excluir.cshtml", excluirVm);
+    }
+
+    [HttpPost]
+    public ActionResult ExcluirCategoria(Guid id, bool confirmado = true)
+    {
+        if (!confirmado)
+            return RedirectToAction("ListarCategorias");
+
+        if (!servicoCategoria.ExcluirCategoria(id))
+            TempData["MensagemErro"] = "Falha ao excluir a categoria.";
+
+        return RedirectToAction("ListarCategorias");
     }
 
     [HttpGet]
