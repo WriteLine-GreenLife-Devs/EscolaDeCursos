@@ -1,5 +1,15 @@
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
 
+public record CadastrarProfessorDto(
+    string Nome,
+    string Email,
+    string Senha,
+    string Telefone,
+    string Bio,
+    string Especialidades,
+    DateTime DataContratacao
+);
+
 public record CadastrarProfessorPerfilDto(
     Guid UsuarioId,
     string Bio,
