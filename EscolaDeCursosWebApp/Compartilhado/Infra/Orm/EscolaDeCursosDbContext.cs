@@ -3,6 +3,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
 using Microsoft.EntityFrameworkCore;
 
 namespace EscolaDeCursosWebApp.Compartilhado.Infra.Orm;
@@ -15,6 +16,7 @@ public sealed class EscolaDeCursosDbContext(DbContextOptions<EscolaDeCursosDbCon
     public DbSet<Curso> Cursos => Set<Curso>();
     public DbSet<Turma> Turmas => Set<Turma>();
     public DbSet<Matricula> Matriculas => Set<Matricula>();
+    public DbSet<ProfessorPerfil> Professores => Set<ProfessorPerfil>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
