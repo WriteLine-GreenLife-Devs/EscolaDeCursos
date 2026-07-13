@@ -5,15 +5,11 @@ namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
 
 public sealed class ProfessorPerfil : EntidadeBase<ProfessorPerfil>
 {
-    public string bio { get; set; } = string.Empty;
-    public string especialidades { get; set; } = string.Empty;
-    public DateTime dataContratacao { get; set; } = DateTime.Today;
-
+    public string Bio { get; set; } = string.Empty;
+    public string Especialidades { get; set; } = string.Empty;
+    public DateTime DataContratacao { get; set; }
     public Usuario Usuario { get; set; } = null!;
-
-    public ProfessorPerfil()
-    {
-    }
+    public ProfessorPerfil() { }
 
     public ProfessorPerfil(
         Guid usuarioId,
@@ -22,39 +18,67 @@ public sealed class ProfessorPerfil : EntidadeBase<ProfessorPerfil>
         DateTime dataContratacao)
     {
         Id = usuarioId;
-        this.bio = bio;
-        this.especialidades = especialidades;
-        this.dataContratacao = dataContratacao;
+        Bio = bio?.Trim() ?? string.Empty;
+        Especialidades = especialidades?.Trim() ?? string.Empty;
+        DataContratacao = dataContratacao.Date;
     }
 
     public override void Atualizar(ProfessorPerfil entidadeAtualizada)
     {
-        bio = entidadeAtualizada.bio;
-        especialidades = entidadeAtualizada.especialidades;
-        dataContratacao = entidadeAtualizada.dataContratacao;
+        Bio = entidadeAtualizada.Bio?.Trim() ?? string.Empty;
+        Especialidades =
+            entidadeAtualizada.Especialidades?.Trim() ?? string.Empty;
+
+        DataContratacao = entidadeAtualizada.DataContratacao.Date;
     }
 
     public override List<string> Validar()
     {
-        var erros = new List<string>();
+        List<string> erros = [];
 
         if (Id == Guid.Empty)
-            erros.Add("O professor deve estar vinculado a um usuário.");
+            erros.Add(
+                "O professor deve estar vinculado a um usuário."
+            );
 
-        if (string.IsNullOrWhiteSpace(bio))
-            erros.Add("O campo \"Biografia\" deve ser preenchido.");
-        else if (bio.Length > 1000)
-            erros.Add("O campo \"Biografia\" deve conter no máximo 1000 caracteres.");
+        if (string.IsNullOrWhiteSpace(Bio))
+        {
+            erros.Add(
+                "O campo \"Biografia\" deve ser preenchido."
+            );
+        }
+        else if (Bio.Length > 1000)
+        {
+            erros.Add(
+                "O campo \"Biografia\" deve conter no máximo 1000 caracteres."
+            );
+        }
 
-        if (string.IsNullOrWhiteSpace(especialidades))
-            erros.Add("O campo \"Especialidades\" deve ser preenchido.");
-        else if (especialidades.Length > 500)
-            erros.Add("O campo \"Especialidades\" deve conter no máximo 500 caracteres.");
+        if (string.IsNullOrWhiteSpace(Especialidades))
+        {
+            erros.Add(
+                "O campo \"Especialidades\" deve ser preenchido."
+            );
+        }
+        else if (Especialidades.Length > 500)
+        {
+            erros.Add(
+                "O campo \"Especialidades\" deve conter no máximo 500 caracteres."
+            );
+        }
 
-        if (dataContratacao == default)
-            erros.Add("O campo \"Data de contratação\" deve ser preenchido.");
-        else if (dataContratacao.Date > DateTime.Today)
-            erros.Add("A data de contratação não pode ser futura.");
+        if (DataContratacao == default)
+        {
+            erros.Add(
+                "O campo \"Data de contratação\" deve ser preenchido."
+            );
+        }
+        else if (DataContratacao.Date > DateTime.Today)
+        {
+            erros.Add(
+                "A data de contratação não pode ser futura."
+            );
+        }
 
         return erros;
     }
