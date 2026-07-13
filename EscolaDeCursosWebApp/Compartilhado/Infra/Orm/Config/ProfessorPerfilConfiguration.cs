@@ -2,7 +2,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Infra;
+namespace EscolaDeCursosWebApp.Compartilhado.Infra.Orm.Config;
 
 public sealed class ProfessorPerfilConfiguration
     : IEntityTypeConfiguration<ProfessorPerfil>
