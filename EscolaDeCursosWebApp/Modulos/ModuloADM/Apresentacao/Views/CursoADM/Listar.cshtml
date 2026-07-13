@@ -1,0 +1,55 @@
+@model List<EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.CursoADMViewModel>
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Cursos";
+}
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-outline-primary rounded-pill px-4" asp-action="CadastrarCurso">Cadastrar Novo Curso</a>
+    <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="Index">Voltar ao ADM</a>
+</div>
+
+@if (TempData["MensagemErro"] is string mensagemErro)
+{
+    <div class="alert alert-danger border-start border-danger border-4 rounded-3" role="alert">
+        @mensagemErro
+    </div>
+}
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-primary border-start border-primary border-4 rounded-3" role="alert">
+        Nenhum curso cadastrado.
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+        @foreach (var curso in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <h5 class="card-title mb-0">@curso.Nome</h5>
+                            <span class="badge text-bg-@((curso.Status == EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio.StatusCurso.Ativo) ? "success" : "secondary") rounded-pill">
+                                @curso.Status
+                            </span>
+                        </div>
+
+                        <p class="card-text mb-2">@curso.Descricao</p>
+                        <p class="card-text small text-muted mb-3">Categoria: @curso.CategoriaNome</p>
+                        <p class="card-text small text-muted mb-3">Carga Horária: @curso.CargaHoraria</p>
+                        <p class="card-text small text-muted mb-3">Valor: @curso.Valor.ToString("C")</p>
+
+                        <div class="mt-auto d-flex flex-wrap gap-2 justify-content-end">
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="EditarCurso" asp-route-id="@curso.Id">Editar</a>
+                            <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirCurso" asp-route-id="@curso.Id">Excluir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

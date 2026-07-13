@@ -1,0 +1,50 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao.ExcluirCursoDto
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Excluir Curso";
+}
+
+<form class="card border-danger-subtle shadow-sm mx-auto p-4" style="max-width: 720px;" asp-action="ExcluirCurso" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="alert alert-warning" role="alert">
+        Tem certeza que deseja excluir este curso?
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Nome</label>
+        <input value="@Model.nome" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Descrição</label>
+        <textarea class="form-control" rows="4" disabled>@Model.descricao</textarea>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Carga Horária</label>
+            <input value="@Model.cargaHoraria" class="form-control" disabled />
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Valor</label>
+            <input value="@Model.valor.ToString("C")" class="form-control" disabled />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Categoria</label>
+        <input value="@Model.CategoriaNome" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Status</label>
+        <input value="@Model.status" class="form-control" disabled />
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="ListarCursos">Voltar</a>
+        <button class="btn btn-danger rounded-pill px-4" type="submit">Excluir</button>
+    </div>
+</form>

@@ -1,5 +1,7 @@
 using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +15,9 @@ public class ADMController(
     ServicoUsuario servicoUsuario,
     IRepositorioUsuario repositorioUsuario,
     ServicoCategoria servicoCategoria,
-    IRepositorioCategoria repositorioCategoria
+    IRepositorioCategoria repositorioCategoria,
+    ServicoCurso servicoCurso,
+    IRepositorioCurso repositorioCurso
 ) : Controller
 {
     [HttpGet]
@@ -112,6 +116,137 @@ public class ADMController(
             TempData["MensagemErro"] = "Falha ao excluir a categoria.";
 
         return RedirectToAction("ListarCategorias");
+    }
+
+    [HttpGet]
+    public ActionResult ListarCursos()
+    {
+        var categorias = repositorioCategoria.SelecionarTodos()
+            .ToDictionary(c => c.Id, c => c.nome);
+
+        var cursos = repositorioCurso.SelecionarTodos()
+            .OrderBy(c => c.nome)
+            .Select(curso => new CursoADMViewModel
+            {
+                Id = curso.Id,
+                Nome = curso.nome,
+                Descricao = curso.descricao,
+                CargaHoraria = curso.cargaHoraria,
+                NivelDificuldade = curso.nivelDificuldade,
+                Status = curso.status,
+                Valor = curso.valor,
+                CategoriaNome = categorias.TryGetValue(curso.categoriaId, out var nomeCategoria) ? nomeCategoria : "-"
+            })
+            .ToList();
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Listar.cshtml", cursos);
+    }
+
+    [HttpGet]
+    public ActionResult CadastrarCurso()
+    {
+        ViewBag.Categorias = repositorioCategoria.SelecionarTodos().OrderBy(c => c.nome).ToList();
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Cadastrar.cshtml", new CadastrarCursoDto());
+    }
+
+    [HttpPost]
+    public ActionResult CadastrarCurso(CadastrarCursoDto cadastrarVm)
+    {
+        ViewBag.Categorias = repositorioCategoria.SelecionarTodos().OrderBy(c => c.nome).ToList();
+
+        if (!ModelState.IsValid)
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Cadastrar.cshtml", cadastrarVm);
+
+        var resultado = servicoCurso.CadastrarCurso(cadastrarVm);
+
+        if (resultado.IsFailed)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Errors.First().Message);
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Cadastrar.cshtml", cadastrarVm);
+        }
+
+        return RedirectToAction("ListarCursos");
+    }
+
+    [HttpGet]
+    public ActionResult EditarCurso(Guid id)
+    {
+        var curso = repositorioCurso.SelecionarPorId(id);
+
+        if (curso == null)
+            return NotFound();
+
+        ViewBag.Categorias = repositorioCategoria.SelecionarTodos().OrderBy(c => c.nome).ToList();
+
+        var editarVm = new EditarCursoDto(
+            curso.Id,
+            curso.nome,
+            curso.descricao,
+            curso.cargaHoraria,
+            curso.nivelDificuldade,
+            curso.status,
+            curso.valor,
+            curso.categoriaId
+        );
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Editar.cshtml", editarVm);
+    }
+
+    [HttpPost]
+    public ActionResult EditarCurso(Guid id, EditarCursoDto editarVm)
+    {
+        ViewBag.Categorias = repositorioCategoria.SelecionarTodos().OrderBy(c => c.nome).ToList();
+
+        if (!ModelState.IsValid)
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Editar.cshtml", editarVm);
+
+        var resultado = servicoCurso.EditarCurso(id, editarVm);
+
+        if (resultado.IsFailed)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Errors.First().Message);
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Editar.cshtml", editarVm);
+        }
+
+        return RedirectToAction("ListarCursos");
+    }
+
+    [HttpGet]
+    public ActionResult ExcluirCurso(Guid id)
+    {
+        var curso = repositorioCurso.SelecionarPorId(id);
+
+        if (curso == null)
+            return NotFound();
+
+        var categoria = repositorioCategoria.SelecionarPorId(curso.categoriaId);
+        var excluirVm = new ExcluirCursoDto(
+            curso.Id,
+            curso.nome,
+            curso.descricao,
+            curso.cargaHoraria,
+            curso.nivelDificuldade,
+            curso.status,
+            curso.valor,
+            curso.categoriaId
+        )
+        {
+            CategoriaNome = categoria?.nome ?? "-"
+        };
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Excluir.cshtml", excluirVm);
+    }
+
+    [HttpPost]
+    public ActionResult ExcluirCurso(Guid id, bool confirmado = true)
+    {
+        if (!confirmado)
+            return RedirectToAction("ListarCursos");
+
+        if (!servicoCurso.ExcluirCurso(id))
+            TempData["MensagemErro"] = "Falha ao excluir o curso.";
+
+        return RedirectToAction("ListarCursos");
     }
 
     [HttpGet]

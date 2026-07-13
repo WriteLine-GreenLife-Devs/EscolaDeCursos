@@ -1,0 +1,72 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao.CadastrarCursoDto
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Cadastrar Curso";
+}
+
+<form class="card border-primary-subtle shadow-sm mx-auto p-4" style="max-width: 720px;" asp-action="CadastrarCurso" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger small fw-semibold mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="nome" class="form-label fw-semibold">Nome</label>
+        <input asp-for="nome" class="form-control" />
+        <span asp-validation-for="nome" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="descricao" class="form-label fw-semibold">Descrição</label>
+        <textarea asp-for="descricao" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="descricao" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="row"> 
+        <div class="col-md-6 mb-3">
+            <label asp-for="cargaHoraria" class="form-label fw-semibold">Carga Horária</label>
+            <input asp-for="cargaHoraria" class="form-control" />
+            <span asp-validation-for="cargaHoraria" class="text-danger small fw-semibold"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="valor" class="form-label fw-semibold">Valor</label>
+            <input asp-for="valor" class="form-control" />
+            <span asp-validation-for="valor" class="text-danger small fw-semibold"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="nivelDificuldade" class="form-label fw-semibold">Nível de Dificuldade</label>
+        <select asp-for="nivelDificuldade" class="form-select">
+            <option value="Iniciante">Iniciante</option>
+            <option value="Intermediario">Intermediário</option>
+            <option value="Avancado">Avançado</option>
+        </select>
+        <span asp-validation-for="nivelDificuldade" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="status" class="form-label fw-semibold">Status</label>
+        <select asp-for="status" class="form-select">
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+        </select>
+        <span asp-validation-for="status" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="categoriaId" class="form-label fw-semibold">Categoria</label>
+        <select asp-for="categoriaId" class="form-select">
+            <option value="">Selecione...</option>
+            @foreach (var categoria in ViewBag.Categorias as List<EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio.Categoria>)
+            {
+                <option value="@categoria.Id">@categoria.nome</option>
+            }
+        </select>
+        <span asp-validation-for="categoriaId" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="ListarCursos">Voltar</a>
+        <button class="btn btn-primary rounded-pill px-4" type="submit">Cadastrar</button>
+    </div>
+</form>

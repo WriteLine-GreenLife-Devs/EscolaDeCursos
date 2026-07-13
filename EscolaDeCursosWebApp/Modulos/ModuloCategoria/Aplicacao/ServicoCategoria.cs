@@ -1,5 +1,6 @@
 ﻿using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using FluentResults;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloCategoria.Aplicacao;
