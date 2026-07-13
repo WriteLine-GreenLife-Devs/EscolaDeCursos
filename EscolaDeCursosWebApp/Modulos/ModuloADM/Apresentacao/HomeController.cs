@@ -403,6 +403,30 @@ public class ADMController(
     }
 
     [HttpGet]
+    public ActionResult VerNotas(Guid matriculaId, Guid turmaId)
+    {
+        var ficha = servicoMatricula.ObterFichaNotas(matriculaId);
+        if (ficha == null)
+            return RedirectToAction("VerTurma", new { id = turmaId });
+
+        ViewBag.TurmaId = turmaId;
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/VerNotas.cshtml", ficha);
+    }
+
+    [HttpPost]
+    public ActionResult AtualizarNotas(AtualizarNotasDto dto, Guid turmaId)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction("VerNotas", new { matriculaId = dto.MatriculaId, turmaId });
+
+        var resultado = servicoMatricula.AtualizarNotas(dto);
+        if (resultado.IsFailed)
+            TempData["MensagemErro"] = resultado.Errors.First().Message;
+
+        return RedirectToAction("VerTurma", new { id = turmaId });
+    }
+
+    [HttpGet]
     public ActionResult CadastrarTurma()
     {
         ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();

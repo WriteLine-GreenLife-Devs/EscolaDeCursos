@@ -107,4 +107,53 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
             Matriculas = matriculas
         };
     }
+
+    public FichaNotasDto? ObterFichaNotas(Guid matriculaId)
+    {
+        var matricula = repositorioMatricula.SelecionarPorId(matriculaId);
+        if (matricula == null) return null;
+
+        var aluno = repositorioUsuario.SelecionarPorId(matricula.AlunoId);
+
+        return new FichaNotasDto
+        {
+            MatriculaId = matricula.Id,
+            AlunoId = matricula.AlunoId,
+            AlunoNome = aluno?.nome ?? string.Empty,
+            Nota1 = matricula.Nota1,
+            Nota2 = matricula.Nota2,
+            Nota3 = matricula.Nota3,
+            Recuperacao = matricula.Recuperacao,
+            NotaFinal = matricula.NotaFinal,
+            Situacao = matricula.Situacao
+        };
+    }
+
+    public Result AtualizarNotas(AtualizarNotasDto dto)
+    {
+        var matricula = repositorioMatricula.SelecionarPorId(dto.MatriculaId);
+        if (matricula == null)
+            return Falha(nameof(dto.MatriculaId), "Matrícula não encontrada.");
+
+        if (matricula.Situacao != SituacaoMatricula.Cursando)
+            return Falha(string.Empty, "Somente matrículas com situação 'Cursando' podem ter notas alteradas.");
+
+        try
+        {
+            matricula.AtualizarNotas(dto.Nota1, dto.Nota2, dto.Nota3, dto.Recuperacao);
+        }
+        catch (ArgumentException ex)
+        {
+            return Falha(string.Empty, ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Falha(string.Empty, ex.Message);
+        }
+
+        if (!repositorioMatricula.Editar(dto.MatriculaId, matricula))
+            return Falha(string.Empty, "Falha ao salvar notas.");
+
+        return Result.Ok();
+    }
 }

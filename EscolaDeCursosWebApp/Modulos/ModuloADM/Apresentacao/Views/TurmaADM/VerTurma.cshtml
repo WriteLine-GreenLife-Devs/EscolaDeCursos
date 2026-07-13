@@ -55,6 +55,7 @@
                         <td>@m.Situacao</td>
                         <td>@m.DataMatricula.ToString("g")</td>
                         <td>
+                            <a class="btn btn-outline-secondary btn-sm me-1" asp-action="VerNotas" asp-route-matriculaId="@m.MatriculaId" asp-route-turmaId="@Model.TurmaId">Ver Notas</a>
                             @if (m.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando)
                             {
                                 <form asp-action="TrancarMatricula" method="post" style="display:inline-block">

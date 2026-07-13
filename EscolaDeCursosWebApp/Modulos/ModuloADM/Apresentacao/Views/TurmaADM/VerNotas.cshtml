@@ -1,0 +1,90 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao.FichaNotasDto
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Ficha de Notas";
+    var turmaId = ViewBag.TurmaId as Guid? ?? Guid.Empty;
+}
+
+<h3>Ficha de Notas — @Model.AlunoNome</h3>
+
+@if (TempData["MensagemErro"] is string msgErro)
+{
+    <div class="alert alert-danger">@msgErro</div>
+}
+
+<form asp-action="AtualizarNotas" method="post" class="row g-3">
+    <input type="hidden" name="MatriculaId" value="@Model.MatriculaId" />
+    <input type="hidden" name="turmaId" value="@turmaId" />
+
+    <div class="col-md-2">
+        <label class="form-label">Nota 1</label>
+        <input name="Nota1" type="number" step="0.01" min="0" max="10" value="@(Model.Nota1.HasValue ? Model.Nota1.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Nota 2</label>
+        <input name="Nota2" type="number" step="0.01" min="0" max="10" value="@(Model.Nota2.HasValue ? Model.Nota2.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Nota 3</label>
+        <input name="Nota3" type="number" step="0.01" min="0" max="10" value="@(Model.Nota3.HasValue ? Model.Nota3.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Recuperação</label>
+        <input name="Recuperacao" type="number" step="0.01" min="0" max="10" value="@(Model.Recuperacao.HasValue ? Model.Recuperacao.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label">Média</label>
+        <input id="media" type="text" class="form-control" value="@(Model.NotaFinal.HasValue ? Model.NotaFinal.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" readonly />
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label">Situação</label>
+        <input type="text" class="form-control" value="@Model.Situacao" readonly />
+    </div>
+
+    <div class="col-12">
+        @if (Model.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando)
+        {
+            <button class="btn btn-primary">Salvar Notas</button>
+            <a class="btn btn-secondary ms-2" asp-action="VerTurma" asp-route-id="@turmaId">Voltar</a>
+        }
+        else
+        {
+            <a class="btn btn-secondary" asp-action="VerTurma" asp-route-id="@turmaId">Voltar</a>
+        }
+    </div>
+</form>
+
+<script>
+    (function(){
+        const toNum = v => v === "" ? null : parseFloat(v);
+        const inputs = Array.from(document.querySelectorAll('input[name="Nota1"], input[name="Nota2"], input[name="Nota3"], input[name="Recuperacao"]'));
+        const mediaEl = document.getElementById('media');
+
+        function calcular(){
+            const n1 = toNum(document.querySelector('input[name="Nota1"]').value);
+            const n2 = toNum(document.querySelector('input[name="Nota2"]').value);
+            const n3 = toNum(document.querySelector('input[name="Nota3"]').value);
+            const rec = toNum(document.querySelector('input[name="Recuperacao"]').value);
+
+            if (n1 != null && n2 != null && n3 != null){
+                const media = Math.round(((n1 + n2 + n3) / 3) * 100) / 100;
+                if (media >= 6){
+                    mediaEl.value = media.toFixed(2);
+                } else if (rec != null){
+                    const final = Math.round(((media + rec) / 2) * 100) / 100;
+                    mediaEl.value = final.toFixed(2);
+                } else {
+                    mediaEl.value = media.toFixed(2);
+                }
+            } else {
+                mediaEl.value = '';
+            }
+        }
+
+        inputs.forEach(i => i.addEventListener('input', calcular));
+        calcular();
+    })();
+</script>

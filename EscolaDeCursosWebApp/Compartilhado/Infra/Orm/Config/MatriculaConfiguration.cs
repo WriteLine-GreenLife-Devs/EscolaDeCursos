@@ -29,6 +29,26 @@ public sealed class MatriculaConfiguration : IEntityTypeConfiguration<Matricula>
             .HasConversion<int>()
             .IsRequired();
 
+        builder.Property(m => m.Nota1)
+            .HasColumnType("decimal(5,2)")
+            .IsRequired(false);
+
+        builder.Property(m => m.Nota2)
+            .HasColumnType("decimal(5,2)")
+            .IsRequired(false);
+
+        builder.Property(m => m.Nota3)
+            .HasColumnType("decimal(5,2)")
+            .IsRequired(false);
+
+        builder.Property(m => m.Recuperacao)
+            .HasColumnType("decimal(5,2)")
+            .IsRequired(false);
+
+        builder.Property(m => m.NotaFinal)
+            .HasColumnType("decimal(5,2)")
+            .IsRequired(false);
+
         builder.HasIndex(m => m.TurmaId)
             .HasDatabaseName("IX_TBMatricula_TurmaId");
 

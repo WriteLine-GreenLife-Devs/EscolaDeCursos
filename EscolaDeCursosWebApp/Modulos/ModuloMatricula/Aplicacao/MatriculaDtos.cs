@@ -39,3 +39,27 @@ public sealed class TurmaDetalheDto
     public int VagasMaximas { get; set; }
     public List<MatriculaAlunoDto> Matriculas { get; set; } = new();
 }
+
+public sealed class AtualizarNotasDto
+{
+    [Required]
+    public Guid MatriculaId { get; set; }
+
+    public double? Nota1 { get; set; }
+    public double? Nota2 { get; set; }
+    public double? Nota3 { get; set; }
+    public double? Recuperacao { get; set; }
+}
+
+public sealed class FichaNotasDto
+{
+    public Guid MatriculaId { get; set; }
+    public Guid AlunoId { get; set; }
+    public string AlunoNome { get; set; } = string.Empty;
+    public double? Nota1 { get; set; }
+    public double? Nota2 { get; set; }
+    public double? Nota3 { get; set; }
+    public double? Recuperacao { get; set; }
+    public double? NotaFinal { get; set; }
+    public SituacaoMatricula Situacao { get; set; }
+}
