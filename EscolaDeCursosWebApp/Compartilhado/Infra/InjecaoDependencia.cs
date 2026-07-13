@@ -1,4 +1,6 @@
 using EscolaDeCursosWebApp.Compartilhado.Infra.Orm;
+using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Infra;
 using Microsoft.EntityFrameworkCore;
 
 namespace EscolaDeCursosWebApp.Compartilhado.Infra;
@@ -30,5 +32,6 @@ public static class InjecaoDependencia
         });
 
         // services.AddScoped<IRepositorioContato, RepositorioContatoEmOrm>();
+        services.AddScoped<IRepositorioUsuario, RepositorioUsuario>();
     }
 }

@@ -1,4 +1,7 @@
 using EscolaDeCursosWebApp.Compartilhado.Aplicacao.Logging;
+using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Infra;
 
 namespace EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 
@@ -12,6 +15,7 @@ public static class InjecaoDependencia
     {
         services.AddSerilogLogger(configuration, logging);
 
-        // services.AddScoped<ServicoContato>();
+        services.AddScoped<IRepositorioUsuario, RepositorioUsuario>();
+        services.AddScoped<ServicoUsuario>();
     }
 }

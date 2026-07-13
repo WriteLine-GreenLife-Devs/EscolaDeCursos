@@ -1,33 +1,32 @@
 @{
-    Layout = "_Layout";
-    ViewBag.Titulo = "Página Inicial";
+    Layout = "_LayoutPaginaInicial";
+    ViewBag.Titulo = "Login";
 }
 
-<div class="row g-2">
-    <div class="col-lg-7">
-        <h1 class="display-5 fw-semibold mb-3">Escola de Cursos Web</h1>
-        <p class="lead text-secondary mb-4">
-            Bem-vindo à Escola de Cursos Web!
-        </p>
-
-        <div class="d-flex flex-wrap gap-2">
-            <a class="btn btn-primary rounded-pill px-4" asp-controller="Exemplo" asp-action="Listar">Exemplo</a>
-        </div>
-
-    </div>
-
-    <div class="col-lg-5">
-        <div class="card border-primary-subtle shadow-sm">
-            <div class="card-body p-4">
-                <h3 class="h5 mb-3" style="color: #fff4e8;">Módulos disponíveis</h3>
-
-                <div class="list-group">
-                    <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" asp-controller="Exemplo" asp-action="Listar">
-                        Exemplo
-                        <span class="badge text-bg-primary rounded-pill">Abrir</span>
-                    </a>
-                </div>
+<div class="d-flex align-items-center justify-content-center min-vh-75">
+    <div class="card shadow-sm w-100" style="max-width: 420px;">
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <h2 class="h4 fw-semibold">Acessar a plataforma</h2>
+                <p class="text-secondary mb-0">Use seu email e senha para entrar.</p>
             </div>
+
+            <form>
+                <div class="mb-3">
+                    <label for="Email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="Email" name="Email" placeholder="seu@email.com" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="Senha" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="Senha" name="Senha" placeholder="Senha" required>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                    <a class="btn btn-outline-secondary btn-lg" asp-controller="Usuario" asp-action="CadastrarAluno">Cadastrar como aluno</a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
