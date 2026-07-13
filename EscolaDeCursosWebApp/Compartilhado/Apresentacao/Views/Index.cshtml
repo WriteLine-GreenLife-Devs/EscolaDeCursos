@@ -11,7 +11,7 @@
                 <p class="text-secondary mb-0">Use seu email e senha para entrar.</p>
             </div>
 
-            <form>
+            <form asp-controller="Usuario" asp-action="Login" method="post">
                 <div class="mb-3">
                     <label for="Email" class="form-label">Email</label>
                     <input type="email" class="form-control" id="Email" name="Email" placeholder="seu@email.com" required>

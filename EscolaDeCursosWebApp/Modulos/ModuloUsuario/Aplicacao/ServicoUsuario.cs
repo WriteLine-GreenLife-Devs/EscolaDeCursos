@@ -70,4 +70,13 @@ public class ServicoUsuario : ServicoBase<Usuario>
 
         return Result.Ok();
     }
+
+    public Usuario? AutenticarUsuario(string email, string senha)
+    {
+        if(string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
+            return null;
+
+        var encontrados = repositorioUsuario.Filtrar(u => string.Equals(u.email, email, StringComparison.OrdinalIgnoreCase) && u.senha == senha);
+        return encontrados.FirstOrDefault();
+    }
 }

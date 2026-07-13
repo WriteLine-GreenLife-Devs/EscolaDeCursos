@@ -45,4 +45,30 @@ public class UsuarioController(ServicoUsuario servicoUsuario, IMapper mapeador) 
 
         return RedirectToAction("Index", "Home");
     }
+
+    [HttpPost]
+    public ActionResult Login(string Email, string Senha)
+    {
+        if(string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha))
+        {
+            ModelState.AddModelError(string.Empty, "Email e senha são obrigatórios.");
+            return RedirectToAction("Index", "Home");
+        }
+
+        var usuario = servicoUsuario.AutenticarUsuario(Email, Senha);
+        if(usuario == null)
+        {
+            // credenciais inválidas
+            TempData["LoginError"] = "Credenciais inválidas.";
+            return RedirectToAction("Index", "Home");
+        }
+
+        if(usuario.tipoUsuario == TipoUsuario.ADM)
+        {
+            return Redirect("/ModuloADM/Apresentacao/Index");
+        }
+
+        // por enquanto, redireciona para a home padrão
+        return RedirectToAction("Index", "Home");
+    }
 }
