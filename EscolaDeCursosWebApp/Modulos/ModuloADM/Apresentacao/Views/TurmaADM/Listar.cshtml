@@ -5,9 +5,9 @@
     ViewBag.Titulo = "Turmas";
 }
 
-<div class="d-flex flex-wrap gap-2 mb-4">
-    <a class="btn btn-outline-primary rounded-pill px-4" asp-action="CadastrarTurma">Cadastrar Nova Turma</a>
-    <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="Index">Voltar ao ADM</a>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-outline-primary rounded-pill px-4" asp-controller="ADM" asp-action="CadastrarTurma">Cadastrar Nova Turma</a>
+    <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="ADM" asp-action="Index">Voltar ao ADM</a>
 </div>
 
 <div class="mb-4">
