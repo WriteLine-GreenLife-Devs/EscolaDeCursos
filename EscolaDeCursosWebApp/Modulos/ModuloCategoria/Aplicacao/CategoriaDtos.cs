@@ -3,37 +3,40 @@ using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloCategoria.Aplicacao;
 
-public record CadastrarCategoriaDto(
-    [property: Required]
-    [property: StringLength(100, MinimumLength = 3)]
-    string nome,
+public sealed class CadastrarCategoriaDto
+{
+    [Required]
+    [StringLength(100, MinimumLength = 3)]
+    public string nome { get; set; } = string.Empty;
 
-    [property: Required]
-    [property: StringLength(200, MinimumLength = 3)]
-    string descricao,
+    [Required]
+    [StringLength(200, MinimumLength = 3)]
+    public string descricao { get; set; } = string.Empty;
 
-    [property: Required]
-    StatusCategoria status
-);
+    [Required]
+    public StatusCategoria status { get; set; } = StatusCategoria.Ativo;
+}
 
-public record EditarCategoriaDto(
-    Guid Id,
+public sealed class EditarCategoriaDto
+{
+    public Guid Id { get; set; }
 
-    [property: Required]
-    [property: StringLength(100, MinimumLength = 3)]
-    string nome,
+    [Required]
+    [StringLength(100, MinimumLength = 3)]
+    public string nome { get; set; } = string.Empty;
 
-    [property: Required]
-    [property: StringLength(200, MinimumLength = 3)]
-    string descricao,
+    [Required]
+    [StringLength(200, MinimumLength = 3)]
+    public string descricao { get; set; } = string.Empty;
 
-    [property: Required]
-    StatusCategoria status
-);
+    [Required]
+    public StatusCategoria status { get; set; } = StatusCategoria.Ativo;
+}
 
-public record ExcluirCategoriaDto(
-    Guid Id,
-    string nome,
-    string descricao,
-    StatusCategoria status
-);
+public sealed class ExcluirCategoriaDto
+{
+    public Guid Id { get; set; }
+    public string nome { get; set; } = string.Empty;
+    public string descricao { get; set; } = string.Empty;
+    public StatusCategoria status { get; set; } = StatusCategoria.Ativo;
+}
