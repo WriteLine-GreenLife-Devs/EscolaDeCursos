@@ -1,0 +1,66 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
+
+public record CadastrarProfessorPerfilViewModel(
+    [Required(ErrorMessage = "O usuário é obrigatório.")]
+    Guid UsuarioId,
+
+    [Required(ErrorMessage = "A biografia é obrigatória.")]
+    [StringLength(
+        1000,
+        ErrorMessage = "A biografia deve conter no máximo 1000 caracteres."
+    )]
+    string Bio,
+
+    [Required(ErrorMessage = "As especialidades são obrigatórias.")]
+    [StringLength(
+        500,
+        ErrorMessage = "As especialidades devem conter no máximo 500 caracteres."
+    )]
+    string Especialidades,
+
+    [Required(ErrorMessage = "A data de contratação é obrigatória.")]
+    [DataType(DataType.Date)]
+    DateTime DataContratacao
+);
+
+public record EditarProfessorPerfilViewModel(
+    Guid Id,
+
+    [Required(ErrorMessage = "A biografia é obrigatória.")]
+    [StringLength(
+        1000,
+        ErrorMessage = "A biografia deve conter no máximo 1000 caracteres."
+    )]
+    string Bio,
+
+    [Required(ErrorMessage = "As especialidades são obrigatórias.")]
+    [StringLength(
+        500,
+        ErrorMessage = "As especialidades devem conter no máximo 500 caracteres."
+    )]
+    string Especialidades,
+
+    [Required(ErrorMessage = "A data de contratação é obrigatória.")]
+    [DataType(DataType.Date)]
+    DateTime DataContratacao
+);
+
+public record ListarProfessoresViewModel(
+    Guid Id,
+    string Nome,
+    string Email,
+    string Especialidades,
+    DateTime DataContratacao
+);
+
+public record DetalhesProfessorViewModel(
+    Guid Id,
+    string Nome,
+    string Email,
+    string Telefone,
+    string Bio,
+    string Especialidades,
+    DateTime DataContratacao
+);
