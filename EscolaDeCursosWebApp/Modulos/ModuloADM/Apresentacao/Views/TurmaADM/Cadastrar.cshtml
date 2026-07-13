@@ -1,0 +1,81 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao.CadastrarTurmaDto
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Cadastrar Turma";
+}
+
+<form class="card border-primary-subtle shadow-sm mx-auto p-4" style="max-width: 720px;" asp-action="CadastrarTurma" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger small fw-semibold mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="nome" class="form-label fw-semibold">Nome</label>
+        <input asp-for="nome" class="form-control" />
+        <span asp-validation-for="nome" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="dataInicio" class="form-label fw-semibold">Data de Início</label>
+            <input asp-for="dataInicio" class="form-control" type="date" />
+            <span asp-validation-for="dataInicio" class="text-danger small fw-semibold"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="dataFim" class="form-label fw-semibold">Data de Término</label>
+            <input asp-for="dataFim" class="form-control" type="date" />
+            <span asp-validation-for="dataFim" class="text-danger small fw-semibold"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="vagasMaximas" class="form-label fw-semibold">Vagas Máximas</label>
+            <input asp-for="vagasMaximas" class="form-control" />
+            <span asp-validation-for="vagasMaximas" class="text-danger small fw-semibold"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="HorarioTurno" class="form-label fw-semibold">Horário / Turno</label>
+            <input asp-for="HorarioTurno" class="form-control" />
+            <span asp-validation-for="HorarioTurno" class="text-danger small fw-semibold"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="status" class="form-label fw-semibold">Status</label>
+        <select asp-for="status" class="form-select">
+            <option value="InscricoesAbertas">Inscrições Abertas</option>
+            <option value="EmAndamento">Em Andamento</option>
+            <option value="Encerrada">Encerrada</option>
+        </select>
+        <span asp-validation-for="status" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="cursoId" class="form-label fw-semibold">Curso</label>
+        <select asp-for="cursoId" class="form-select">
+            <option value="">Selecione...</option>
+            @foreach (var curso in ViewBag.Cursos as List<EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio.Curso>)
+            {
+                <option value="@curso.Id">@curso.nome</option>
+            }
+        </select>
+        <span asp-validation-for="cursoId" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="instrutorId" class="form-label fw-semibold">Instrutor</label>
+        <select asp-for="instrutorId" class="form-select">
+            <option value="">Selecione...</option>
+            @foreach (var professor in ViewBag.Professores as List<EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio.Usuario>)
+            {
+                <option value="@professor.Id">@professor.nome</option>
+            }
+        </select>
+        <span asp-validation-for="instrutorId" class="text-danger small fw-semibold"></span>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="ListarTurmas">Voltar</a>
+        <button class="btn btn-primary rounded-pill px-4" type="submit">Cadastrar</button>
+    </div>
+</form>

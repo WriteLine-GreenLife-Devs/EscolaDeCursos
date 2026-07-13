@@ -2,6 +2,8 @@ using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +19,9 @@ public class ADMController(
     ServicoCategoria servicoCategoria,
     IRepositorioCategoria repositorioCategoria,
     ServicoCurso servicoCurso,
-    IRepositorioCurso repositorioCurso
+    IRepositorioCurso repositorioCurso,
+    ServicoTurma servicoTurma,
+    IRepositorioTurma repositorioTurma
 ) : Controller
 {
     [HttpGet]
@@ -247,6 +251,162 @@ public class ADMController(
             TempData["MensagemErro"] = "Falha ao excluir o curso.";
 
         return RedirectToAction("ListarCursos");
+    }
+
+    [HttpGet]
+    public ActionResult ListarTurmas()
+    {
+        var cursos = repositorioCurso.SelecionarTodos().ToDictionary(c => c.Id, c => c.nome);
+        var professores = repositorioUsuario.SelecionarTodos()
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .ToDictionary(u => u.Id, u => u.nome);
+
+        var turmas = repositorioTurma.SelecionarTodos()
+            .OrderBy(t => t.nome)
+            .Select(turma => new TurmaADMViewModel
+            {
+                Id = turma.Id,
+                Nome = turma.nome,
+                DataInicio = turma.dataInicio,
+                DataFim = turma.dataFim,
+                VagasMaximas = turma.vagasMaximas,
+                HorarioTurno = turma.HorarioTurno,
+                Status = turma.status,
+                CursoNome = cursos.TryGetValue(turma.cursoId, out var nomeCurso) ? nomeCurso : "-",
+                InstrutorNome = professores.TryGetValue(turma.instrutorId, out var nomeInstrutor) ? nomeInstrutor : "-"
+            })
+            .ToList();
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Listar.cshtml", turmas);
+    }
+
+    [HttpGet]
+    public ActionResult CadastrarTurma()
+    {
+        ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
+        ViewBag.Professores = repositorioUsuario.SelecionarTodos()
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .OrderBy(u => u.nome)
+            .ToList();
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Cadastrar.cshtml", new CadastrarTurmaDto());
+    }
+
+    [HttpPost]
+    public ActionResult CadastrarTurma(CadastrarTurmaDto cadastrarVm)
+    {
+        ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
+        ViewBag.Professores = repositorioUsuario.SelecionarTodos()
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .OrderBy(u => u.nome)
+            .ToList();
+
+        if (!ModelState.IsValid)
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Cadastrar.cshtml", cadastrarVm);
+
+        var resultado = servicoTurma.CadastrarTurma(cadastrarVm);
+
+        if (resultado.IsFailed)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Errors.First().Message);
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Cadastrar.cshtml", cadastrarVm);
+        }
+
+        return RedirectToAction("ListarTurmas");
+    }
+
+    [HttpGet]
+    public ActionResult EditarTurma(Guid id)
+    {
+        var turma = repositorioTurma.SelecionarPorId(id);
+
+        if (turma == null)
+            return NotFound();
+
+        ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
+        ViewBag.Professores = repositorioUsuario.SelecionarTodos()
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .OrderBy(u => u.nome)
+            .ToList();
+
+        var editarVm = new EditarTurmaDto
+        {
+            Id = turma.Id,
+            nome = turma.nome,
+            dataInicio = turma.dataInicio,
+            dataFim = turma.dataFim,
+            vagasMaximas = turma.vagasMaximas,
+            HorarioTurno = turma.HorarioTurno,
+            status = turma.status,
+            cursoId = turma.cursoId,
+            instrutorId = turma.instrutorId
+        };
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Editar.cshtml", editarVm);
+    }
+
+    [HttpPost]
+    public ActionResult EditarTurma(Guid id, EditarTurmaDto editarVm)
+    {
+        ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
+        ViewBag.Professores = repositorioUsuario.SelecionarTodos()
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .OrderBy(u => u.nome)
+            .ToList();
+
+        if (!ModelState.IsValid)
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Editar.cshtml", editarVm);
+
+        var resultado = servicoTurma.EditarTurma(id, editarVm);
+
+        if (resultado.IsFailed)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Errors.First().Message);
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Editar.cshtml", editarVm);
+        }
+
+        return RedirectToAction("ListarTurmas");
+    }
+
+    [HttpGet]
+    public ActionResult ExcluirTurma(Guid id)
+    {
+        var turma = repositorioTurma.SelecionarPorId(id);
+
+        if (turma == null)
+            return NotFound();
+
+        var curso = repositorioCurso.SelecionarPorId(turma.cursoId);
+        var instrutor = repositorioUsuario.SelecionarPorId(turma.instrutorId);
+
+        var excluirVm = new ExcluirTurmaDto
+        {
+            Id = turma.Id,
+            nome = turma.nome,
+            dataInicio = turma.dataInicio,
+            dataFim = turma.dataFim,
+            vagasMaximas = turma.vagasMaximas,
+            HorarioTurno = turma.HorarioTurno,
+            status = turma.status,
+            cursoId = turma.cursoId,
+            instrutorId = turma.instrutorId,
+            CursoNome = curso?.nome ?? "-",
+            InstrutorNome = instrutor?.nome ?? "-"
+        };
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Excluir.cshtml", excluirVm);
+    }
+
+    [HttpPost]
+    public ActionResult ExcluirTurma(Guid id, bool confirmado = true)
+    {
+        if (!confirmado)
+            return RedirectToAction("ListarTurmas");
+
+        if (!servicoTurma.ExcluirTurma(id))
+            TempData["MensagemErro"] = "Falha ao excluir a turma.";
+
+        return RedirectToAction("ListarTurmas");
     }
 
     [HttpGet]

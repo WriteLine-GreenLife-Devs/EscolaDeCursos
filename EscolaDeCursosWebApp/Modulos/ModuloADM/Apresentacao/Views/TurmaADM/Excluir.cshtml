@@ -1,0 +1,60 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao.ExcluirTurmaDto
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Excluir Turma";
+}
+
+<form class="card border-danger-subtle shadow-sm mx-auto p-4" style="max-width: 720px;" asp-action="ExcluirTurma" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="alert alert-warning" role="alert">
+        Tem certeza que deseja excluir esta turma?
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Nome</label>
+        <input value="@Model.nome" class="form-control" disabled />
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Data de Início</label>
+            <input value="@Model.dataInicio.ToString("d")" class="form-control" disabled />
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Data de Término</label>
+            <input value="@Model.dataFim.ToString("d")" class="form-control" disabled />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Vagas Máximas</label>
+        <input value="@Model.vagasMaximas" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Horário / Turno</label>
+        <input value="@Model.HorarioTurno" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Status</label>
+        <input value="@Model.status" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Curso</label>
+        <input value="@Model.CursoNome" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Instrutor</label>
+        <input value="@Model.InstrutorNome" class="form-control" disabled />
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="ListarTurmas">Voltar</a>
+        <button class="btn btn-danger rounded-pill px-4" type="submit">Excluir</button>
+    </div>
+</form>
