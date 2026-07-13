@@ -22,7 +22,8 @@ public class ADMController(
     ServicoCurso servicoCurso,
     IRepositorioCurso repositorioCurso,
     ServicoTurma servicoTurma,
-    IRepositorioTurma repositorioTurma
+    IRepositorioTurma repositorioTurma,
+    ServicoMatricula servicoMatricula
 ) : Controller
 {
     [HttpGet]
@@ -342,6 +343,63 @@ public class ADMController(
             .ToList();
 
         return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/Listar.cshtml", turmas);
+    }
+
+    [HttpGet]
+    public ActionResult VerTurma(Guid id)
+    {
+        var detalhe = servicoMatricula.ObterDetalhesTurma(id);
+        if (detalhe == null)
+            return RedirectToAction("ListarTurmas");
+
+        var alunos = repositorioUsuario.SelecionarTodos().Where(u => u.tipoUsuario == TipoUsuario.Aluno).ToList();
+
+        var alunosDisponiveis = alunos
+            .Select(a => new { a.Id, a.nome })
+            .ToList();
+
+        var vm = new EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.VerTurmaViewModel
+        {
+            TurmaId = detalhe.TurmaId,
+            TurmaNome = detalhe.TurmaNome,
+            InstrutorNome = detalhe.InstrutorNome,
+            VagasMaximas = detalhe.VagasMaximas,
+            Matriculas = detalhe.Matriculas.Select(m => new EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.AlunoMatriculaViewModel
+            {
+                MatriculaId = m.MatriculaId,
+                AlunoId = m.AlunoId,
+                AlunoNome = m.AlunoNome,
+                Situacao = m.Situacao,
+                DataMatricula = m.DataMatricula
+            }).ToList(),
+            AlunosDisponiveis = alunosDisponiveis.Select(a => new EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.SelectAlunoViewModel { AlunoId = a.Id, Nome = a.nome }).ToList()
+        };
+
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/VerTurma.cshtml", vm);
+    }
+
+    [HttpPost]
+    public ActionResult CadastrarMatricula(CadastrarMatriculaDto dto)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction("VerTurma", new { id = dto.TurmaId });
+
+        var resultado = servicoMatricula.CadastrarMatricula(dto);
+        if (resultado.IsFailed)
+            TempData["MensagemErro"] = resultado.Errors.First().Message;
+
+        return RedirectToAction("VerTurma", new { id = dto.TurmaId });
+    }
+
+    [HttpPost]
+    public ActionResult TrancarMatricula(Guid matriculaId, Guid turmaId)
+    {
+        var dto = new AlterarSituacaoMatriculaDto { MatriculaId = matriculaId, NovaSituacao = Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado };
+        var resultado = servicoMatricula.AlterarSituacaoMatricula(dto);
+        if (resultado.IsFailed)
+            TempData["MensagemErro"] = resultado.Errors.First().Message;
+
+        return RedirectToAction("VerTurma", new { id = turmaId });
     }
 
     [HttpGet]

@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
@@ -18,19 +15,20 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
     public ServicoMatricula(
         IRepositorioMatricula repositorioMatricula,
         IRepositorioTurma repositorioTurma,
-        IRepositorioUsuario repositorioUsuario
-    )
+        IRepositorioUsuario repositorioUsuario)
     {
         this.repositorioMatricula = repositorioMatricula;
         this.repositorioTurma = repositorioTurma;
         this.repositorioUsuario = repositorioUsuario;
     }
 
+    private static Result Falha(string campo, string mensagem)
+    {
+        return Result.Fail(new Error(mensagem).WithMetadata("Campo", campo));
+    }
+
     public Result CadastrarMatricula(CadastrarMatriculaDto dto)
     {
-        if (dto == null)
-            return Falha(string.Empty, "Dados de matrícula inválidos.");
-
         var turma = repositorioTurma.SelecionarPorId(dto.TurmaId);
         if (turma == null)
             return Falha(nameof(dto.TurmaId), "Turma não encontrada.");
@@ -39,71 +37,74 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
         if (aluno == null || aluno.tipoUsuario != TipoUsuario.Aluno)
             return Falha(nameof(dto.AlunoId), "Aluno não encontrado ou inválido.");
 
-        var matriculaExistente = repositorioMatricula.SelecionarTodos()
-            .Any(m => m.TurmaId == dto.TurmaId && m.AlunoId == dto.AlunoId);
+        // contar ocupadas (apenas Cursando ocupam vaga)
+        var ocupadas = repositorioMatricula.Filtrar(m => m.TurmaId == dto.TurmaId && m.Situacao == SituacaoMatricula.Cursando).Count;
+        if (ocupadas >= turma.vagasMaximas)
+            return Falha(string.Empty, "Não há vagas disponíveis nesta turma.");
 
-        if (matriculaExistente)
-            return Falha(nameof(dto.AlunoId), "O aluno já está matriculado nesta turma.");
-
-        int vagasOcupadas = repositorioMatricula.SelecionarTodos()
-            .Count(m => m.TurmaId == dto.TurmaId && m.Situacao == SituacaoMatricula.Cursando);
-
-        if (vagasOcupadas >= turma.vagasMaximas)
-            return Falha(string.Empty, "Não há vagas disponíveis para esta turma.");
+        // evitar matricular o mesmo aluno duas vezes como Cursando
+        var existenteAtiva = repositorioMatricula.Filtrar(m => m.TurmaId == dto.TurmaId && m.AlunoId == dto.AlunoId && m.Situacao == SituacaoMatricula.Cursando).Any();
+        if (existenteAtiva)
+            return Falha(string.Empty, "Aluno já está matriculado nesta turma.");
 
         var matricula = new Matricula(dto.AlunoId, dto.TurmaId, DateTime.Now, SituacaoMatricula.Cursando);
-        var validacao = ValidarEntidade(matricula);
 
-        if (validacao.IsFailed)
-            return validacao;
+        var erros = matricula.Validar();
+        if (erros.Count > 0)
+            return Falha(string.Empty, erros.First());
 
         repositorioMatricula.Cadastrar(matricula);
         return Result.Ok();
     }
 
-    public Result AlterarSituacaoMatricula(Guid matriculaId, SituacaoMatricula novaSituacao)
+    public Result AlterarSituacaoMatricula(AlterarSituacaoMatriculaDto dto)
     {
-        var matricula = repositorioMatricula.SelecionarPorId(matriculaId);
+        var matricula = repositorioMatricula.SelecionarPorId(dto.MatriculaId);
         if (matricula == null)
-            return Falha(nameof(matriculaId), "Matrícula não encontrada.");
+            return Falha(nameof(dto.MatriculaId), "Matrícula não encontrada.");
 
-        if (matricula.Situacao == novaSituacao)
-            return Falha(string.Empty, "A situação já está definida dessa forma.");
+        if (matricula.Situacao == SituacaoMatricula.Trancado)
+            return Falha(string.Empty, "Matrícula trancada não pode ser alterada.");
 
-        if (matricula.Situacao == SituacaoMatricula.Cursando && novaSituacao != SituacaoMatricula.Trancado)
-            return Falha(string.Empty, "Apenas matrículas em curso podem ser trancadas.");
+        // Permitimos apenas trancar a matrícula através desta ação (conforme regra atual)
+        if (dto.NovaSituacao != SituacaoMatricula.Trancado)
+            return Falha(nameof(dto.NovaSituacao), "Só é permitido alterar a situação para 'Trancado' via esta ação.");
 
-        if (matricula.Situacao == SituacaoMatricula.Trancado && novaSituacao != SituacaoMatricula.Cursando)
-            return Falha(string.Empty, "Apenas matrículas trancadas podem ser reativadas.");
+        matricula.Situacao = SituacaoMatricula.Trancado;
 
-        if (novaSituacao == SituacaoMatricula.Cursando)
-        {
-            var turma = repositorioTurma.SelecionarPorId(matricula.TurmaId);
-            if (turma == null)
-                return Falha(nameof(matricula.TurmaId), "Turma não encontrada.");
-
-            int vagasOcupadas = repositorioMatricula.SelecionarTodos()
-                .Count(m => m.TurmaId == matricula.TurmaId && m.Situacao == SituacaoMatricula.Cursando);
-
-            if (vagasOcupadas >= turma.vagasMaximas)
-                return Falha(string.Empty, "Não há vagas disponíveis para reativar essa matrícula.");
-        }
-
-        var matriculaAtualizada = new Matricula(matricula.AlunoId, matricula.TurmaId, matricula.DataMatricula, novaSituacao);
-
-        if (!repositorioMatricula.Editar(matriculaId, matriculaAtualizada))
-            return Falha(string.Empty, "Falha ao atualizar a situação da matrícula.");
+        if (!repositorioMatricula.Editar(dto.MatriculaId, matricula))
+            return Falha(string.Empty, "Falha ao atualizar situação da matrícula.");
 
         return Result.Ok();
     }
 
-    public List<Matricula> SelecionarMatriculasPorTurma(Guid turmaId)
+    public TurmaDetalheDto? ObterDetalhesTurma(Guid turmaId)
     {
-        return repositorioMatricula.SelecionarTodos().Where(m => m.TurmaId == turmaId).ToList();
-    }
+        var turma = repositorioTurma.SelecionarPorId(turmaId);
+        if (turma == null) return null;
 
-    public bool ExcluirMatricula(Guid id)
-    {
-        return repositorioMatricula.Excluir(id);
+        var instrutor = repositorioUsuario.SelecionarPorId(turma.instrutorId);
+
+        var matriculas = repositorioMatricula.Filtrar(m => m.TurmaId == turmaId)
+            .Select(m => new MatriculaAlunoDto
+            {
+                MatriculaId = m.Id,
+                AlunoId = m.AlunoId,
+                AlunoNome = (repositorioUsuario.SelecionarPorId(m.AlunoId)?.nome) ?? string.Empty,
+                Situacao = m.Situacao,
+                DataMatricula = m.DataMatricula
+            })
+            .OrderBy(m => m.DataMatricula)
+            .ToList();
+
+        return new TurmaDetalheDto
+        {
+            TurmaId = turma.Id,
+            TurmaNome = turma.nome,
+            InstrutorId = turma.instrutorId,
+            InstrutorNome = instrutor?.nome ?? string.Empty,
+            VagasMaximas = turma.vagasMaximas,
+            Matriculas = matriculas
+        };
     }
 }

@@ -1,0 +1,76 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.VerTurmaViewModel
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Detalhes da Turma";
+}
+
+<h3>@Model.TurmaNome</h3>
+<p class="small text-muted">Instrutor: @Model.InstrutorNome</p>
+<p class="small text-muted">Vagas: @Model.VagasMaximas</p>
+
+@if (TempData["MensagemErro"] is string msgErro)
+{
+    <div class="alert alert-danger">@msgErro</div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Adicionar aluno</h5>
+        <form asp-action="CadastrarMatricula" method="post" class="row g-2 align-items-center">
+            <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
+            <div class="col-auto">
+                <select name="AlunoId" class="form-select">
+                    <option value="">-- Selecionar aluno --</option>
+                    @foreach(var a in Model.AlunosDisponiveis)
+                    {
+                        <option value="@a.AlunoId">@a.Nome</option>
+                    }
+                </select>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary">Adicionar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Alunos matriculados</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Situação</th>
+                    <th>Data</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var m in Model.Matriculas)
+                {
+                    <tr>
+                        <td>@m.AlunoNome</td>
+                        <td>@m.Situacao</td>
+                        <td>@m.DataMatricula.ToString("g")</td>
+                        <td>
+                            @if (m.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando)
+                            {
+                                <form asp-action="TrancarMatricula" method="post" style="display:inline-block">
+                                    <input type="hidden" name="matriculaId" value="@m.MatriculaId" />
+                                    <input type="hidden" name="turmaId" value="@Model.TurmaId" />
+                                    <button class="btn btn-sm btn-warning">Trancar</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">(não editável)</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

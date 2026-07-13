@@ -20,3 +20,22 @@ public sealed class AlterarSituacaoMatriculaDto
     [Required]
     public SituacaoMatricula NovaSituacao { get; set; }
 }
+
+public sealed class MatriculaAlunoDto
+{
+    public Guid MatriculaId { get; set; }
+    public Guid AlunoId { get; set; }
+    public string AlunoNome { get; set; } = string.Empty;
+    public SituacaoMatricula Situacao { get; set; }
+    public DateTime DataMatricula { get; set; }
+}
+
+public sealed class TurmaDetalheDto
+{
+    public Guid TurmaId { get; set; }
+    public string TurmaNome { get; set; } = string.Empty;
+    public Guid InstrutorId { get; set; }
+    public string InstrutorNome { get; set; } = string.Empty;
+    public int VagasMaximas { get; set; }
+    public List<MatriculaAlunoDto> Matriculas { get; set; } = new();
+}
