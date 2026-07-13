@@ -27,7 +27,8 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-// Middlewares de roteamento
+// Middlewares de arquivos estáticos e roteamento
+app.UseStaticFiles();
 app.UseRouting();
 app.MapDefaultControllerRoute();
 
