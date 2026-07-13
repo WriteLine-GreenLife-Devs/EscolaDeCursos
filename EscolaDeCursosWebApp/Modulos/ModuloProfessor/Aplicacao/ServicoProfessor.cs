@@ -1,0 +1,190 @@
+using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using FluentResults;
+
+namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
+
+public sealed class ServicoProfessor
+    : ServicoBase<ProfessorPerfil>
+{
+    private readonly IRepositorioProfessorPerfil repositorioProfessor;
+    private readonly IRepositorioUsuario repositorioUsuario;
+
+    public ServicoProfessor(
+        IRepositorioProfessorPerfil repositorioProfessor,
+        IRepositorioUsuario repositorioUsuario)
+    {
+        this.repositorioProfessor = repositorioProfessor;
+        this.repositorioUsuario = repositorioUsuario;
+    }
+
+    public Result Cadastrar(CadastrarProfessorPerfilDto dto)
+    {
+        if (dto.UsuarioId == Guid.Empty)
+        {
+            return Falha(
+                nameof(dto.UsuarioId),
+                "O usuário do professor é obrigatório."
+            );
+        }
+
+        Usuario? usuario =
+            repositorioUsuario.SelecionarPorId(dto.UsuarioId);
+
+        if (usuario == null)
+        {
+            return Falha(
+                nameof(dto.UsuarioId),
+                "Usuário não encontrado."
+            );
+        }
+
+        if (usuario.tipoUsuario != TipoUsuario.Professor)
+        {
+            return Falha(
+                nameof(dto.UsuarioId),
+                "O usuário selecionado não é um professor."
+            );
+        }
+
+        ProfessorPerfil? perfilExistente =
+            repositorioProfessor.SelecionarPorId(dto.UsuarioId);
+
+        if (perfilExistente != null)
+        {
+            return Falha(
+                nameof(dto.UsuarioId),
+                "Este usuário já possui um perfil de professor."
+            );
+        }
+
+        var professor = new ProfessorPerfil(
+            dto.UsuarioId,
+            dto.Bio,
+            dto.Especialidades,
+            dto.DataContratacao
+        );
+
+        Result resultadoValidacao =
+            ValidarEntidade(professor);
+
+        if (resultadoValidacao.IsFailed)
+            return resultadoValidacao;
+
+        repositorioProfessor.Cadastrar(professor);
+
+        return Result.Ok();
+    }
+
+    public Result Editar(EditarProfessorPerfilDto dto)
+    {
+        ProfessorPerfil? perfilExistente =
+            repositorioProfessor.SelecionarPorId(dto.Id);
+
+        if (perfilExistente == null)
+        {
+            return Falha(
+                nameof(dto.Id),
+                "Perfil de professor não encontrado."
+            );
+        }
+
+        var perfilAtualizado = new ProfessorPerfil(
+            dto.Id,
+            dto.Bio,
+            dto.Especialidades,
+            dto.DataContratacao
+        );
+
+        Result resultadoValidacao =
+            ValidarEntidade(perfilAtualizado);
+
+        if (resultadoValidacao.IsFailed)
+            return resultadoValidacao;
+
+        bool conseguiuEditar =
+            repositorioProfessor.Editar(
+                dto.Id,
+                perfilAtualizado
+            );
+
+        if (!conseguiuEditar)
+        {
+            return Falha(
+                string.Empty,
+                "Não foi possível atualizar o perfil do professor."
+            );
+        }
+
+        return Result.Ok();
+    }
+
+    public List<ListarProfessoresDto> SelecionarTodos()
+    {
+        List<ProfessorPerfil> perfis =
+            repositorioProfessor.SelecionarTodos();
+
+        var professores = new List<ListarProfessoresDto>();
+
+        foreach (ProfessorPerfil perfil in perfis)
+        {
+            Usuario? usuario =
+                repositorioUsuario.SelecionarPorId(perfil.Id);
+
+            if (usuario == null)
+                continue;
+
+            professores.Add(
+                MapearParaListagem(perfil, usuario)
+            );
+        }
+
+        return professores;
+    }
+
+    public DetalhesProfessorDto? SelecionarPorId(Guid id)
+    {
+        ProfessorPerfil? perfil =
+            repositorioProfessor.SelecionarPorId(id);
+
+        if (perfil == null)
+            return null;
+
+        Usuario? usuario =
+            repositorioUsuario.SelecionarPorId(id);
+
+        if (usuario == null)
+            return null;
+
+        return MapearParaDetalhes(perfil, usuario);
+    }
+
+    private static ListarProfessoresDto MapearParaListagem(
+        ProfessorPerfil perfil,
+        Usuario usuario)
+    {
+        return new ListarProfessoresDto(
+            perfil.Id,
+            usuario.nome,
+            usuario.email,
+            perfil.Especialidades,
+            perfil.DataContratacao
+        );
+    }
+
+    private static DetalhesProfessorDto MapearParaDetalhes(
+        ProfessorPerfil perfil,
+        Usuario usuario)
+    {
+        return new DetalhesProfessorDto(
+            perfil.Id,
+            usuario.nome,
+            usuario.email,
+            usuario.telefone,
+            perfil.Bio,
+            perfil.Especialidades,
+            perfil.DataContratacao
+        );
+    }
+}
