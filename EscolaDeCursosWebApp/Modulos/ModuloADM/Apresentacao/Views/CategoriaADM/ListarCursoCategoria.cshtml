@@ -2,29 +2,17 @@
 
 @{
     Layout = "_LayoutADM";
-    ViewBag.Titulo = "Cursos";
+    ViewBag.Titulo = ViewBag.CategoriaNome ?? "Cursos da Categoria";
 }
 
 <div class="d-flex flex-wrap gap-2 mb-4">
-    <a class="btn btn-outline-primary rounded-pill px-4" asp-action="CadastrarCurso">Cadastrar Novo Curso</a>
-    <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="Index">Voltar ao ADM</a>
+    <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="ADM" asp-action="ListarCategorias">Voltar</a>
 </div>
-
-<div class="mb-4">
-    <input id="searchInput" type="search" class="form-control form-control-lg" placeholder="Pesquisar cursos por nome, descrição, categoria..." autocomplete="off" />
-</div>
-
-@if (TempData["MensagemErro"] is string mensagemErro)
-{
-    <div class="alert alert-danger border-start border-danger border-4 rounded-3" role="alert">
-        @mensagemErro
-    </div>
-}
 
 @if (Model.Count == 0)
 {
     <div class="alert alert-primary border-start border-primary border-4 rounded-3" role="alert">
-        Nenhum curso cadastrado.
+        Nenhum curso cadastrado nesta categoria.
     </div>
 }
 else
@@ -57,9 +45,9 @@ else
                         <p class="card-text small text-muted mb-3">Valor: @curso.Valor.ToString("C")</p>
 
                         <div class="mt-auto d-flex flex-wrap gap-2 justify-content-end">
-                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="EditarCurso" asp-route-id="@curso.Id">Editar</a>
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-controller="ADM" asp-action="EditarCurso" asp-route-id="@curso.Id">Editar</a>
                             <a class="btn btn-outline-secondary btn-sm rounded-pill px-3" asp-controller="ADM" asp-action="ListarTurmaCurso" asp-route-id="@curso.Id">Ver Turmas</a>
-                            <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirCurso" asp-route-id="@curso.Id">Excluir</a>
+                            <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-controller="ADM" asp-action="ExcluirCurso" asp-route-id="@curso.Id">Excluir</a>
                         </div>
                     </div>
                 </div>
@@ -71,16 +59,6 @@ else
 <script>
     (function () {
         const searchInput = document.getElementById('searchInput');
-        if (!searchInput) return;
-
-        const cards = Array.from(document.querySelectorAll('.list-search-card'));
-
-        searchInput.addEventListener('input', function () {
-            const term = this.value.trim().toLowerCase();
-            cards.forEach(card => {
-                const fields = (card.dataset.searchFields || '').toLowerCase();
-                card.style.display = term === '' || fields.includes(term) ? '' : 'none';
-            });
-        });
+        // This view may not have a search input; implement client-side search by adding one if needed later.
     })();
 </script>

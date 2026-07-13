@@ -11,7 +11,7 @@
 </div>
 
 <div class="mb-4">
-    <input id="searchInput" type="search" class="form-control form-control-lg" placeholder="Pesquisar categorias por nome..." autocomplete="off" />
+    <input id="searchInput" type="search" class="form-control form-control-lg" placeholder="Pesquisar categorias por nome, descrição..." autocomplete="off" />
 </div>
 
 @if (TempData["MensagemErro"] is string mensagemErro)
@@ -32,7 +32,7 @@ else
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
         @foreach (var categoria in Model)
         {
-            <div class="col list-search-card">
+            <div class="col list-search-card" data-search-fields="@($"{categoria.nome} {categoria.descricao}")">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
@@ -46,6 +46,7 @@ else
 
                         <div class="mt-auto d-flex flex-wrap gap-2 justify-content-end">
                             <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="EditarCategoria" asp-route-id="@categoria.Id">Editar</a>
+                            <a class="btn btn-outline-secondary btn-sm rounded-pill px-3" asp-controller="ADM" asp-action="ListarCursoCategoria" asp-route-id="@categoria.Id">Ver Cursos</a>
                             <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirCategoria" asp-route-id="@categoria.Id">Excluir</a>
                         </div>
                     </div>
@@ -65,8 +66,8 @@ else
         searchInput.addEventListener('input', function () {
             const term = this.value.trim().toLowerCase();
             cards.forEach(card => {
-                const name = card.querySelector('[data-search-name]')?.textContent?.toLowerCase() ?? '';
-                card.style.display = term === '' || name.includes(term) ? '' : 'none';
+                const fields = (card.dataset.searchFields || '').toLowerCase();
+                card.style.display = term === '' || fields.includes(term) ? '' : 'none';
             });
         });
     })();

@@ -147,6 +147,35 @@ public class ADMController(
     }
 
     [HttpGet]
+    public ActionResult ListarCursoCategoria(Guid id)
+    {
+        var categoria = repositorioCategoria.SelecionarPorId(id);
+
+        if (categoria == null)
+            return NotFound();
+
+        var cursos = repositorioCurso.SelecionarTodos()
+            .Where(c => c.categoriaId == id)
+            .OrderBy(c => c.nome)
+            .Select(curso => new CursoADMViewModel
+            {
+                Id = curso.Id,
+                Nome = curso.nome,
+                Descricao = curso.descricao,
+                CargaHoraria = curso.cargaHoraria,
+                NivelDificuldade = curso.nivelDificuldade,
+                Status = curso.status,
+                Valor = curso.valor,
+                CategoriaNome = categoria.nome
+            })
+            .ToList();
+
+        ViewBag.CategoriaNome = categoria.nome;
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CategoriaADM/ListarCursoCategoria.cshtml", cursos);
+    }
+
+
+    [HttpGet]
     public ActionResult CadastrarCurso()
     {
         ViewBag.Categorias = repositorioCategoria.SelecionarTodos().OrderBy(c => c.nome).ToList();
@@ -252,6 +281,40 @@ public class ADMController(
 
         return RedirectToAction("ListarCursos");
     }
+
+    [HttpGet]
+    public ActionResult ListarTurmaCurso(Guid id)
+    {
+        var curso = repositorioCurso.SelecionarPorId(id);
+
+        if (curso == null)
+            return NotFound();
+
+        var professores = repositorioUsuario.SelecionarTodos()
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .ToDictionary(u => u.Id, u => u.nome);
+
+        var turmas = repositorioTurma.SelecionarTodos()
+            .Where(t => t.cursoId == id)
+            .OrderBy(t => t.nome)
+            .Select(turma => new TurmaADMViewModel
+            {
+                Id = turma.Id,
+                Nome = turma.nome,
+                DataInicio = turma.dataInicio,
+                DataFim = turma.dataFim,
+                VagasMaximas = turma.vagasMaximas,
+                HorarioTurno = turma.HorarioTurno,
+                Status = turma.status,
+                CursoNome = curso.nome,
+                InstrutorNome = professores.TryGetValue(turma.instrutorId, out var nomeInstrutor) ? nomeInstrutor : "-"
+            })
+            .ToList();
+
+        ViewBag.CursoNome = curso.nome;
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/ListarTurmaCurso.cshtml", turmas);
+    }
+
 
     [HttpGet]
     public ActionResult ListarTurmas()
