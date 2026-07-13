@@ -9,6 +9,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 
@@ -416,6 +417,31 @@ public class ADMController(
     [HttpPost]
     public ActionResult AtualizarNotas(AtualizarNotasDto dto, Guid turmaId)
     {
+        if (dto.MatriculaId == Guid.Empty && Request.Form.TryGetValue("MatriculaId", out var matriculaIdRaw) &&
+            Guid.TryParse(matriculaIdRaw, out var parsedMatriculaId))
+        {
+            dto.MatriculaId = parsedMatriculaId;
+        }
+
+        if (!TryParseNota(Request.Form, "Nota1", out var nota1) ||
+            !TryParseNota(Request.Form, "Nota2", out var nota2) ||
+            !TryParseNota(Request.Form, "Nota3", out var nota3) ||
+            !TryParseNota(Request.Form, "Recuperacao", out var recuperacao))
+        {
+            TempData["MensagemErro"] = "Formato inválido nas notas. Use 7,50 ou 7.50.";
+            return RedirectToAction("VerNotas", new { matriculaId = dto.MatriculaId, turmaId });
+        }
+
+        dto.Nota1 = nota1;
+        dto.Nota2 = nota2;
+        dto.Nota3 = nota3;
+        dto.Recuperacao = recuperacao;
+
+        ModelState.Remove(nameof(dto.Nota1));
+        ModelState.Remove(nameof(dto.Nota2));
+        ModelState.Remove(nameof(dto.Nota3));
+        ModelState.Remove(nameof(dto.Recuperacao));
+
         if (!ModelState.IsValid)
             return RedirectToAction("VerNotas", new { matriculaId = dto.MatriculaId, turmaId });
 
@@ -424,6 +450,24 @@ public class ADMController(
             TempData["MensagemErro"] = resultado.Errors.First().Message;
 
         return RedirectToAction("VerTurma", new { id = turmaId });
+    }
+
+    private static bool TryParseNota(Microsoft.AspNetCore.Http.IFormCollection form, string fieldName, out double? valor)
+    {
+        valor = null;
+
+        if (!form.TryGetValue(fieldName, out var rawValue) || string.IsNullOrWhiteSpace(rawValue))
+            return true;
+
+        var normalized = rawValue.ToString().Trim().Replace(',', '.');
+
+        if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
+        {
+            valor = parsed;
+            return true;
+        }
+
+        return false;
     }
 
     [HttpGet]
@@ -847,3 +891,4 @@ public class ADMController(
         return RedirectToAction("ListarProfessores");
     }
 }
+

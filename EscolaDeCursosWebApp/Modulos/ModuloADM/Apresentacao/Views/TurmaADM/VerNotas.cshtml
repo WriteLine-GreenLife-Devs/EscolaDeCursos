@@ -19,19 +19,19 @@
 
     <div class="col-md-2">
         <label class="form-label">Nota 1</label>
-        <input name="Nota1" type="number" step="0.01" min="0" max="10" value="@(Model.Nota1.HasValue ? Model.Nota1.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+        <input asp-for="Nota1" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
     </div>
     <div class="col-md-2">
         <label class="form-label">Nota 2</label>
-        <input name="Nota2" type="number" step="0.01" min="0" max="10" value="@(Model.Nota2.HasValue ? Model.Nota2.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+        <input asp-for="Nota2" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
     </div>
     <div class="col-md-2">
         <label class="form-label">Nota 3</label>
-        <input name="Nota3" type="number" step="0.01" min="0" max="10" value="@(Model.Nota3.HasValue ? Model.Nota3.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+        <input asp-for="Nota3" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
     </div>
     <div class="col-md-2">
         <label class="form-label">Recuperação</label>
-        <input name="Recuperacao" type="number" step="0.01" min="0" max="10" value="@(Model.Recuperacao.HasValue ? Model.Recuperacao.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : String.Empty)" class="form-control" @(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : "") />
+        <input asp-for="Recuperacao" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
     </div>
 
     <div class="col-md-2">
@@ -59,7 +59,10 @@
 
 <script>
     (function(){
-        const toNum = v => v === "" ? null : parseFloat(v);
+        const toNum = v => {
+            if (v === "") return null;
+            return parseFloat(v.replace(',', '.'));
+        };
         const inputs = Array.from(document.querySelectorAll('input[name="Nota1"], input[name="Nota2"], input[name="Nota3"], input[name="Recuperacao"]'));
         const mediaEl = document.getElementById('media');
 
