@@ -47,7 +47,7 @@
         <select asp-for="status" class="form-select">
             <option value="InscricoesAbertas" selected="@(Model.status == EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio.StatusTurma.InscricoesAbertas ? "selected" : null)">Inscrições Abertas</option>
             <option value="EmAndamento" selected="@(Model.status == EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio.StatusTurma.EmAndamento ? "selected" : null)">Em Andamento</option>
-            <option value="Encerrada" selected="@(Model.status == EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio.StatusTurma.Encerrada ? "selected" : null)">Encerrada</option>
+            <option value="Concluida" selected="@(Model.status == EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio.StatusTurma.Concluida ? "selected" : null)">Concluída</option>
         </select>
         <span asp-validation-for="status" class="text-danger small fw-semibold"></span>
     </div>
