@@ -4,6 +4,9 @@ using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloUsuario.Apresentacao;
 
@@ -62,13 +65,32 @@ public class UsuarioController(ServicoUsuario servicoUsuario, IMapper mapeador) 
             TempData["LoginError"] = "Credenciais inválidas.";
             return RedirectToAction("Index", "Home");
         }
+        // criar claims e assinar o cookie
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+            new Claim(ClaimTypes.Name, usuario.nome ?? string.Empty),
+            new Claim(ClaimTypes.Email, usuario.email ?? string.Empty),
+            new Claim(ClaimTypes.Role, usuario.tipoUsuario.ToString())
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal).GetAwaiter().GetResult();
 
         if(usuario.tipoUsuario == TipoUsuario.ADM)
         {
             return Redirect("/ModuloADM/Apresentacao/Index");
         }
 
-        // por enquanto, redireciona para a home padrão
+        return RedirectToAction("Index", "Home");
+    }
+
+    [HttpPost]
+    public ActionResult Logout()
+    {
+        HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).GetAwaiter().GetResult();
         return RedirectToAction("Index", "Home");
     }
 }
