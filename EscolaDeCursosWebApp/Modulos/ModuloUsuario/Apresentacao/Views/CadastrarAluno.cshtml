@@ -5,6 +5,8 @@
     ViewBag.Titulo = "Cadastrar Aluno";
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css" />
+
 <div class="d-flex align-items-center justify-content-center min-vh-75">
     <div class="card shadow-sm w-100" style="max-width: 500px;">
         <div class="card-body p-4">
@@ -18,32 +20,48 @@
 
                 <div class="mb-3">
                     <label asp-for="Nome" class="form-label"></label>
-                    <input asp-for="Nome" class="form-control" />
+                    <input asp-for="Nome" class="form-control" placeholder="Ex.: João da Silva" />
                     <span asp-validation-for="Nome" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" />
+                    <input asp-for="Email" class="form-control" placeholder="Ex.: usuario@exemplo.com" />
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
+                    <label asp-for="Telefone" class="form-label"></label>
+                    <input asp-for="Telefone" class="form-control" placeholder="(00) 00000-0000" id="Telefone" />
+                    <span asp-validation-for="Telefone" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
                     <label asp-for="Senha" class="form-label"></label>
-                    <input asp-for="Senha" class="form-control" />
+                    <div class="input-group">
+                        <input asp-for="Senha" type="password" class="form-control" placeholder="Senha" id="Senha" />
+                        <button class="btn btn-outline-secondary" type="button" id="toggleSenha" aria-label="Mostrar senha">
+                            <svg id="iconSenha" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                <path d="M8 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <span asp-validation-for="Senha" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="ConfirmarSenha" class="form-label"></label>
-                    <input asp-for="ConfirmarSenha" class="form-control" />
+                    <div class="input-group">
+                        <input asp-for="ConfirmarSenha" type="password" class="form-control" placeholder="Repita a senha" id="ConfirmarSenha" />
+                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmarSenha" aria-label="Mostrar confirmar senha">
+                            <svg id="iconConfirmarSenha" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                <path d="M8 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <span asp-validation-for="ConfirmarSenha" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Telefone" class="form-label"></label>
-                    <input asp-for="Telefone" class="form-control" />
-                    <span asp-validation-for="Telefone" class="text-danger"></span>
                 </div>
 
                 <div class="d-grid gap-3">
@@ -59,4 +77,59 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+    <script>
+        (function(){
+            var iti = null;
+            document.addEventListener('DOMContentLoaded', function(){
+                var telefoneEl = document.getElementById('Telefone');
+                if(telefoneEl && window.intlTelInput){
+                    iti = window.intlTelInput(telefoneEl, {
+                        initialCountry: 'br',
+                        preferredCountries: ['br'],
+                        separateDialCode: true,
+                        utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js'
+                    });
+                }
+
+                // Toggle senha
+                function setupToggle(inputId, btnId, iconId){
+                    var input = document.getElementById(inputId);
+                    var btn = document.getElementById(btnId);
+                    var icon = document.getElementById(iconId);
+                    if(!input || !btn || !icon) return;
+                    btn.addEventListener('click', function(){
+                        if(input.type === 'password'){
+                            input.type = 'text';
+                            icon.innerHTML = '<path d="M13.359 11.238C14.034 10.5 14.6 9.684 15 8c-4.999 0-8 5-8 5 .79 0 1.532-.18 2.207-.462l.152-.058A3.001 3.001 0 0 0 13.36 11.238z"/>';
+                        } else {
+                            input.type = 'password';
+                            icon.innerHTML = '<path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/><path d="M8 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>';
+                        }
+                    });
+                }
+
+                setupToggle('Senha','toggleSenha','iconSenha');
+                setupToggle('ConfirmarSenha','toggleConfirmarSenha','iconConfirmarSenha');
+
+                // On submit, set telefone value to international format (E.164) if intl-tel-input is available
+                var form = document.querySelector('form[asp-action="CadastrarAluno"]');
+                if(form){
+                    form.addEventListener('submit', function(e){
+                        if(iti && telefoneEl){
+                            try{
+                                var international = iti.getNumber();
+                                if(international){
+                                    telefoneEl.value = international;
+                                }
+                            } catch(err){
+                                // fallback: do nothing
+                            }
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
 }
