@@ -9,6 +9,17 @@
     <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="ADM" asp-action="ListarCategorias">Voltar</a>
 </div>
 
+<div class="mb-4">
+    <input id="searchInput" type="search" class="form-control form-control-lg" placeholder="Pesquisar cursos por nome, descrição, categoria..." autocomplete="off" />
+</div>
+
+@if (TempData["MensagemErro"] is string mensagemErro)
+{
+    <div class="alert alert-danger border-start border-danger border-4 rounded-3" role="alert">
+        @mensagemErro
+    </div>
+}
+
 @if (Model.Count == 0)
 {
     <div class="alert alert-primary border-start border-primary border-4 rounded-3" role="alert">
@@ -59,6 +70,16 @@ else
 <script>
     (function () {
         const searchInput = document.getElementById('searchInput');
-        // This view may not have a search input; implement client-side search by adding one if needed later.
+        if (!searchInput) return;
+
+        const cards = Array.from(document.querySelectorAll('.list-search-card'));
+
+        searchInput.addEventListener('input', function () {
+            const term = this.value.trim().toLowerCase();
+            cards.forEach(card => {
+                const fields = (card.dataset.searchFields || '').toLowerCase();
+                card.style.display = term === '' || fields.includes(term) ? '' : 'none';
+            });
+        });
     })();
 </script>
