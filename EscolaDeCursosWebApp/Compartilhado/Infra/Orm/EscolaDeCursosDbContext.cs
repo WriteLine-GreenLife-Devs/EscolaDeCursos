@@ -1,5 +1,6 @@
 using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public sealed class EscolaDeCursosDbContext(DbContextOptions<EscolaDeCursosDbCon
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Curso> Cursos => Set<Curso>();
     public DbSet<Turma> Turmas => Set<Turma>();
+    public DbSet<Matricula> Matriculas => Set<Matricula>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

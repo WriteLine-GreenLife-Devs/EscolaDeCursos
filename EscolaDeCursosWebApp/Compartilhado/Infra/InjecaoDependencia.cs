@@ -3,6 +3,8 @@ using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Infra;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Infra;
+using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Infra;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Infra;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
@@ -42,5 +44,6 @@ public static class InjecaoDependencia
         services.AddScoped<IRepositorioCategoria, RepositorioCategoria>();
         services.AddScoped<IRepositorioCurso, RepositorioCurso>();
         services.AddScoped<IRepositorioTurma, RepositorioTurma>();
+        services.AddScoped<IRepositorioMatricula, RepositorioMatricula>();
     }
 }
