@@ -1,3 +1,5 @@
+@using System.Security.Claims
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -12,19 +14,44 @@
 </head>
 <body>
     @* Barra de Navegação *@
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">Escola de Cursos Web</a>
+            <a class="navbar-brand fw-semibold" asp-controller="ADM" asp-action="Index">Escola de Cursos Web</a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="menuPrincipal">
-                <div class="navbar-nav ms-auto">
-                    <a class="nav-link" asp-controller="Home" asp-action="Index">Início</a>
-                    <a class="nav-link" asp-controller="Exemplo" asp-action="Listar">Exemplo</a>
+                <div class="navbar-nav me-auto">
+                    <a class="nav-link" asp-controller="ADM" asp-action="Index">Início</a>
+                    <a class="nav-link" asp-controller="ADM" asp-action="ListarAlunos">Alunos</a>
+                    <a class="nav-link" asp-controller="ADM" asp-action="ListarProfessores">Professores</a>
+                    <a class="nav-link" asp-controller="ADM" asp-action="ListarCategorias">Categorias</a>
+                    <a class="nav-link" asp-controller="ADM" asp-action="ListarCursos">Cursos</a>
                 </div>
+
+                @if (User?.Identity?.IsAuthenticated == true)
+                {
+                    <div class="d-flex align-items-center gap-3 text-white ms-lg-3">
+                        <div class="d-flex flex-column align-items-start align-items-lg-end">
+                            <span class="fw-semibold">@User.FindFirstValue(ClaimTypes.Name)</span>
+                            <small class="opacity-75">@User.FindFirstValue(ClaimTypes.Email)</small>
+                        </div>
+
+                        <form asp-controller="Usuario" asp-action="Logout" method="post" class="m-0">
+                            <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                                Sair
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3 ms-lg-3" asp-controller="Usuario" asp-action="Index">
+                        Entrar
+                    </a>
+                }
             </div>
         </div>
     </nav>

@@ -1,0 +1,34 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.ExcluirUsuarioADMViewModel
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Excluir Aluno";
+}
+
+<form class="card border-danger-subtle shadow-sm mx-auto p-4" style="max-width: 620px;" asp-action="ExcluirAluno" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="alert alert-warning" role="alert">
+        Tem certeza que deseja excluir este aluno?
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Nome</label>
+        <input value="@Model.Nome" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Email</label>
+        <input value="@Model.Email" class="form-control" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Telefone</label>
+        <input value="@Model.Telefone" class="form-control" disabled />
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="ListarAlunos">Voltar</a>
+        <button class="btn btn-danger rounded-pill px-4" type="submit">Excluir</button>
+    </div>
+</form>

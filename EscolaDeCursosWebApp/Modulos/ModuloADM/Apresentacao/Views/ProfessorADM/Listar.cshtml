@@ -1,0 +1,54 @@
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Professores";
+}
+
+@model List<EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.UsuarioADMViewModel>;
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-outline-primary rounded-pill px-4" asp-action="CadastrarProfessor">Cadastrar Novo Professor</a>
+    <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="Index">Voltar ao ADM</a>
+</div>
+
+@if (TempData["MensagemErro"] is string mensagemErro)
+{
+    <div class="alert alert-danger border-start border-danger border-4 rounded-3" role="alert">
+        @mensagemErro
+    </div>
+}
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-primary border-start border-primary border-4 rounded-3" role="alert">
+        Nenhum professor cadastrado.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var professor in Model)
+                {
+                    <tr>
+                        <td>@professor.Nome</td>
+                        <td>@professor.Email</td>
+                        <td>@professor.Telefone</td>
+                        <td class="text-end">
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3 me-2" asp-action="EditarProfessor" asp-route-id="@professor.Id">Editar</a>
+                            <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirProfessor" asp-route-id="@professor.Id">Excluir</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
