@@ -25,30 +25,32 @@
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Nome</th>
-                    <th>Email</th>
-                    <th>Telefone</th>
-                    <th class="text-end">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var professor in Model)
-                {
-                    <tr>
-                        <td>@professor.Nome</td>
-                        <td>@professor.Email</td>
-                        <td>@professor.Telefone</td>
-                        <td class="text-end">
-                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3 me-2" asp-action="EditarProfessor" asp-route-id="@professor.Id">Editar</a>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+        @foreach (var professor in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <h5 class="card-title mb-0">@professor.Nome</h5>
+                            <span class="badge text-bg-primary rounded-pill">Professor</span>
+                        </div>
+
+                        <dl class="row g-2 mb-4">
+                            <dt class="col-6 text-secondary fw-semibold">Email</dt>
+                            <dd class="col-6 mb-0 text-break">@professor.Email</dd>
+
+                            <dt class="col-6 text-secondary fw-semibold">Telefone</dt>
+                            <dd class="col-6 mb-0 text-break">@professor.Telefone</dd>
+                        </dl>
+
+                        <div class="d-flex flex-wrap gap-2 mt-auto justify-content-end">
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="EditarProfessor" asp-route-id="@professor.Id">Editar</a>
                             <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirProfessor" asp-route-id="@professor.Id">Excluir</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }
