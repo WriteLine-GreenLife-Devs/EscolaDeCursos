@@ -8,13 +8,11 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 mb-1">Minhas turmas</h1>
+            <h1 class="h3 mb-1">Meus cursos</h1>
 
             <p class="text-secondary mb-0">
                 Bem-vindo,
-                <button type="button"
-                        class="btn btn-link text-secondary p-0 align-baseline"
-                        data-bs-toggle="modal"
+                <button type="button" class="btn btn-link text-secondary p-0 align-baseline" data-bs-toggle="modal"
                         data-bs-target="#modalPerfilProfessor">
                     @Model.NomeProfessor
                 </button>.
@@ -22,14 +20,12 @@
         </div>
 
         <div class="d-flex gap-2">
-            <button type="button"
-                    class="btn btn-outline-primary"
-                    data-bs-toggle="modal"
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                     data-bs-target="#modalPerfilProfessor">
                 Meu perfil
             </button>
 
-            <form action="/ModuloUsuario/Apresentacao/Logout" method="post">
+            <form asp-controller="Usuario" asp-action="Logout" method="post">
                 <button type="submit" class="btn btn-outline-danger">
                     Sair
                 </button>
@@ -37,55 +33,63 @@
         </div>
     </div>
 
-    @if (Model.Turmas.Count == 0)
+    @if (Model.Cursos.Count == 0)
     {
         <div class="alert alert-info">
-            Você ainda não está vinculado a nenhuma turma.
+            Você ainda não está vinculado a nenhum curso.
         </div>
     }
     else
     {
         <div class="row g-4">
-            @foreach (var turma in Model.Turmas)
+            @foreach (var curso in Model.Cursos)
             {
-                <div class="col-md-6 col-xl-4">
+                <div class="col-lg-6">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
-                            <h2 class="h5">
-                                @turma.Nome
-                            </h2>
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                <div>
+                                    <h2 class="h5 mb-1">@curso.Nome</h2>
+                                    <span class="text-secondary small">
+                                        @curso.Turmas.Count turma(s)
+                                    </span>
+                                </div>
 
-                            <p class="text-secondary">
-                                @turma.CursoNome
-                            </p>
+                                <span class="badge text-bg-primary">
+                                    @curso.TotalAlunos aluno(s)
+                                </span>
+                            </div>
 
-                            <dl class="row small mb-3">
-                                <dt class="col-5">Período</dt>
-                                <dd class="col-7">
-                                    @turma.DataInicio.ToString("dd/MM/yyyy")
-                                    até
-                                    @turma.DataFim.ToString("dd/MM/yyyy")
-                                </dd>
+                            <div class="vstack gap-3">
+                                @foreach (var turma in curso.Turmas)
+                                {
+                                    <div class="border rounded p-3">
+                                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                            <strong>@turma.Nome</strong>
+                                            <span class="badge text-bg-light">@turma.Status</span>
+                                        </div>
 
-                                <dt class="col-5">Horário</dt>
-                                <dd class="col-7">
-                                    @turma.HorarioTurno
-                                </dd>
+                                        <dl class="row small mb-3">
+                                            <dt class="col-4">Período</dt>
+                                            <dd class="col-8">
+                                                @turma.DataInicio.ToString("dd/MM/yyyy")
+                                                a
+                                                @turma.DataFim.ToString("dd/MM/yyyy")
+                                            </dd>
 
-                                <dt class="col-5">Situação</dt>
-                                <dd class="col-7">
-                                    @turma.Status
-                                </dd>
+                                            <dt class="col-4">Horário</dt>
+                                            <dd class="col-8">@turma.HorarioTurno</dd>
 
-                                <dt class="col-5">Alunos</dt>
-                                <dd class="col-7">
-                                    @turma.TotalAlunos
-                                </dd>
-                            </dl>
+                                            <dt class="col-4">Alunos</dt>
+                                            <dd class="col-8 mb-0">@turma.TotalAlunos</dd>
+                                        </dl>
 
-                            <a asp-action="DetalhesTurma" asp-route-id="@turma.Id" class="btn btn-primary">
-                                Ver alunos
-                            </a>
+                                        <a asp-action="DetalhesTurma" asp-route-id="@turma.Id" class="btn btn-primary btn-sm">
+                                            Ver turma
+                                        </a>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -94,10 +98,7 @@
     }
 </div>
 
-<div class="modal fade"
-     id="modalPerfilProfessor"
-     tabindex="-1"
-     aria-labelledby="tituloModalPerfilProfessor"
+<div class="modal fade" id="modalPerfilProfessor" tabindex="-1" aria-labelledby="tituloModalPerfilProfessor"
      aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -111,18 +112,13 @@
                     </p>
                 </div>
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Fechar">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
                 </button>
             </div>
 
             <form asp-action="SalvarPerfil" method="post">
                 <div class="modal-body">
-                    <input type="hidden"
-                           name="Id"
-                           value="@(Model.Perfil?.Id ?? Guid.Empty)" />
+                    <input type="hidden" name="Id" value="@(Model.Perfil?.Id ?? Guid.Empty)" />
 
                     @if (TempData["MensagemPerfilErro"] is string mensagemErro)
                     {
@@ -144,9 +140,7 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label">Nome</label>
-                            <input class="form-control"
-                                   value="@Model.NomeProfessor"
-                                   readonly />
+                            <input class="form-control" value="@Model.NomeProfessor" readonly />
                         </div>
 
                         <div class="col-md-6">
@@ -158,19 +152,14 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Telefone</label>
-                            <input class="form-control"
-                                   value="@(Model.Perfil?.Telefone ?? "-")"
-                                   readonly />
+                            <input class="form-control" value="@(Model.Perfil?.Telefone ?? "-")" readonly />
                         </div>
 
                         <div class="col-md-6">
                             <label for="DataContratacao" class="form-label">
                                 Data de contratação
                             </label>
-                            <input id="DataContratacao"
-                                   name="DataContratacao"
-                                   type="date"
-                                   class="form-control"
+                            <input id="DataContratacao" name="DataContratacao" type="date" class="form-control"
                                    value="@(Model.Perfil?.DataContratacao.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))"
                                    required />
                         </div>
@@ -180,12 +169,8 @@
                         <label for="Especialidades" class="form-label">
                             Especialidades
                         </label>
-                        <input id="Especialidades"
-                               name="Especialidades"
-                               class="form-control"
-                               maxlength="500"
-                               value="@Model.Perfil?.Especialidades"
-                               placeholder="Ex.: C#, ASP.NET Core e SQL Server"
+                        <input id="Especialidades" name="Especialidades" class="form-control" maxlength="500"
+                               value="@Model.Perfil?.Especialidades" placeholder="Ex.: C#, ASP.NET Core e SQL Server"
                                required />
                     </div>
 
@@ -193,19 +178,13 @@
                         <label for="Bio" class="form-label">
                             Biografia profissional
                         </label>
-                        <textarea id="Bio"
-                                  name="Bio"
-                                  class="form-control"
-                                  rows="5"
-                                  maxlength="1000"
+                        <textarea id="Bio" name="Bio" class="form-control" rows="5" maxlength="1000"
                                   required>@Model.Perfil?.Bio</textarea>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button"
-                            class="btn btn-outline-secondary"
-                            data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Fechar
                     </button>
 

@@ -3,57 +3,178 @@
 @{
     Layout = "_LayoutPaginaInicial";
     ViewBag.Titulo = "Alunos da Turma";
+
+    DateTime dataMaximaChamada = Model.DataFim.Date < DateTime.Today
+        ? Model.DataFim.Date
+        : DateTime.Today;
+
+    bool chamadaDisponivel = Model.Alunos.Count > 0 &&
+        dataMaximaChamada >= Model.DataInicio.Date;
 }
 
 <div class="container py-5">
-    <div class="mb-4">
-        <a asp-action="Index" class="btn btn-outline-secondary mb-3">
-            Voltar
-        </a>
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3">
+                Voltar
+            </a>
 
-        <h1 class="h3 mb-1">
-            @Model.TurmaNome
-        </h1>
+            <h1 class="h3 mb-1">@Model.TurmaNome</h1>
+            <p class="text-secondary mb-0">
+                @Model.Alunos.Count aluno(s) de @Model.VagasMaximas vaga(s)
+            </p>
+        </div>
 
-        <p class="text-secondary">
-            @Model.Alunos.Count aluno(s) de
-            @Model.VagasMaximas vaga(s).
-        </p>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaChamada"
+                disabled="@(!chamadaDisponivel)">
+            Fazer chamada
+        </button>
     </div>
+
+    @if (TempData["MensagemNotasErro"] is string mensagemErro)
+    {
+        <div class="alert alert-danger">@mensagemErro</div>
+    }
+
+    @if (TempData["MensagemNotasSucesso"] is string mensagemSucesso)
+    {
+        <div class="alert alert-success">@mensagemSucesso</div>
+    }
+
+    @if (TempData["MensagemChamadaErro"] is string mensagemChamadaErro)
+    {
+        <div class="alert alert-danger">@mensagemChamadaErro</div>
+    }
+
+    @if (TempData["MensagemChamadaSucesso"] is string mensagemChamadaSucesso)
+    {
+        <div class="alert alert-success">@mensagemChamadaSucesso</div>
+    }
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             @if (Model.Alunos.Count == 0)
             {
                 <div class="alert alert-info mb-0">
-                    Esta turma ainda não possui alunos
-                    matriculados.
+                    Esta turma ainda não possui alunos matriculados.
                 </div>
             }
             else
             {
                 <div class="table-responsive">
-                    <table class="table align-middle">
+                    <table class="table align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>Aluno</th>
-                                <th>Data da matrícula</th>
                                 <th>Situação</th>
+                                <th class="text-center">Nota 1</th>
+                                <th class="text-center">Nota 2</th>
+                                <th class="text-center">Nota 3</th>
+                                <th class="text-center">Recuperação</th>
+                                <th class="text-center">Final</th>
+                                <th class="text-center">Frequência</th>
+                                <th class="text-end">Ações</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             @foreach (var aluno in Model.Alunos)
                             {
+                                var matriculaAtual = aluno.Matriculas
+                                    .FirstOrDefault(matricula => matricula.Id == aluno.MatriculaId);
+
                                 <tr>
-                                    <td>@aluno.Nome</td>
-
                                     <td>
-                                        @aluno.DataMatricula
-                                        .ToString("dd/MM/yyyy")
+                                        <strong class="d-block">@aluno.Nome</strong>
+                                        <small class="text-secondary">
+                                            Matrícula em @aluno.DataMatricula.ToString("dd/MM/yyyy")
+                                        </small>
                                     </td>
-
                                     <td>@aluno.Situacao</td>
+                                    <td class="text-center">@(aluno.Nota1?.ToString("0.00") ?? "-")</td>
+                                    <td class="text-center">@(aluno.Nota2?.ToString("0.00") ?? "-")</td>
+                                    <td class="text-center">@(aluno.Nota3?.ToString("0.00") ?? "-")</td>
+                                    <td class="text-center">@(aluno.Recuperacao?.ToString("0.00") ?? "-")</td>
+                                    <td class="text-center fw-semibold">@(aluno.NotaFinal?.ToString("0.00") ?? "-")</td>
+                                    <td class="text-center">
+                                        @if (matriculaAtual?.TotalPresencas > 0)
+                                        {
+                                            <span>@matriculaAtual.FrequenciaPercentual%</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#modalAluno-@aluno.AlunoId">
+                                                Ver aluno
+                                            </button>
+
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#modalNotas-@aluno.MatriculaId"
+                                                    disabled="@(aluno.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado)">
+                                                Editar notas
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="h5 mb-0">Chamadas</h2>
+                <span class="text-secondary small">@Model.Chamadas.Count registro(s)</span>
+            </div>
+
+            @if (Model.Chamadas.Count == 0)
+            {
+                <div class="alert alert-info mb-0">
+                    Nenhuma chamada foi registrada para esta turma.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th class="text-center">Presentes</th>
+                                <th class="text-center">Ausentes</th>
+                                <th class="text-center">Sem registro</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var chamada in Model.Chamadas)
+                            {
+                                <tr>
+                                    <td>@chamada.Data.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-center">
+                                        @chamada.Alunos.Count(aluno => aluno.Presente == true)
+                                    </td>
+                                    <td class="text-center">
+                                        @chamada.Alunos.Count(aluno => aluno.Presente == false)
+                                    </td>
+                                    <td class="text-center">
+                                        @chamada.Alunos.Count(aluno => aluno.Presente == null)
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#modalChamada-@chamada.Data.ToString("yyyyMMdd")">
+                                            Editar chamada
+                                        </button>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -63,3 +184,314 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalNovaChamada" tabindex="-1" aria-labelledby="tituloModalNovaChamada" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form asp-action="SalvarChamada" method="post">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title fs-5" id="tituloModalNovaChamada">Fazer chamada</h2>
+                        <p class="text-secondary small mb-0">@Model.TurmaNome</p>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
+
+                    <div class="mb-4">
+                        <label for="DataNovaChamada" class="form-label">Data da aula</label>
+                        <input id="DataNovaChamada" name="DataAula" type="date" class="form-control"
+                               min="@Model.DataInicio.ToString("yyyy-MM-dd")"
+                               max="@dataMaximaChamada.ToString("yyyy-MM-dd")"
+                               value="@dataMaximaChamada.ToString("yyyy-MM-dd")" required />
+                    </div>
+
+                    <div class="vstack gap-2">
+                        @for (int indice = 0; indice < Model.Alunos.Count; indice++)
+                        {
+                            <div class="form-check border rounded p-3 ps-5">
+                                <input type="hidden" name="Alunos[@indice].MatriculaId"
+                                       value="@Model.Alunos[indice].MatriculaId" />
+                                <input class="form-check-input" id="novaChamada-@Model.Alunos[indice].MatriculaId"
+                                       name="Alunos[@indice].Presente" type="checkbox" value="true" />
+                                <label class="form-check-label w-100" for="novaChamada-@Model.Alunos[indice].MatriculaId">
+                                    @Model.Alunos[indice].Nome
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">Salvar chamada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@foreach (var chamada in Model.Chamadas)
+{
+    <div class="modal fade" id="modalChamada-@chamada.Data.ToString("yyyyMMdd")" tabindex="-1"
+         aria-labelledby="tituloModalChamada-@chamada.Data.ToString("yyyyMMdd")" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <form asp-action="SalvarChamada" method="post">
+                    <div class="modal-header">
+                        <div>
+                            <h2 class="modal-title fs-5" id="tituloModalChamada-@chamada.Data.ToString("yyyyMMdd")">
+                                Chamada de @chamada.Data.ToString("dd/MM/yyyy")
+                            </h2>
+                            <p class="text-secondary small mb-0">@Model.TurmaNome</p>
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
+                        <input type="hidden" name="DataAula" value="@chamada.Data.ToString("yyyy-MM-dd")" />
+
+                        <div class="vstack gap-2">
+                            @for (int indice = 0; indice < chamada.Alunos.Count; indice++)
+                            {
+                                <div class="form-check border rounded p-3 ps-5">
+                                    <input type="hidden" name="Alunos[@indice].MatriculaId"
+                                           value="@chamada.Alunos[indice].MatriculaId" />
+                                    <input class="form-check-input"
+                                           id="chamada-@chamada.Data.ToString("yyyyMMdd")-@chamada.Alunos[indice].MatriculaId"
+                                           name="Alunos[@indice].Presente" type="checkbox" value="true"
+                                           checked="@(chamada.Alunos[indice].Presente == true)" />
+                                    <label class="form-check-label w-100"
+                                           for="chamada-@chamada.Data.ToString("yyyyMMdd")-@chamada.Alunos[indice].MatriculaId">
+                                        @chamada.Alunos[indice].Nome
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">Salvar chamada</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@foreach (var aluno in Model.Alunos)
+{
+    <div class="modal fade" id="modalAluno-@aluno.AlunoId" tabindex="-1" aria-labelledby="tituloModalAluno-@aluno.AlunoId"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title fs-5" id="tituloModalAluno-@aluno.AlunoId">
+                            @aluno.Nome
+                        </h2>
+                        <p class="text-secondary small mb-0">Sumário do aluno</p>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-5">
+                            <span class="text-secondary small d-block">Email</span>
+                            <strong class="text-break">
+                                @(string.IsNullOrWhiteSpace(aluno.Email) ? "Não informado" : aluno.Email)
+                            </strong>
+                        </div>
+
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Telefone</span>
+                            <strong>
+                                @(string.IsNullOrWhiteSpace(aluno.Telefone) ? "Não informado" : aluno.Telefone)
+                            </strong>
+                        </div>
+
+                        <div class="col-md-3">
+                            <span class="text-secondary small d-block">Situação do cadastro</span>
+                            <span class="badge @(aluno.Ativo ? "text-bg-success" : "text-bg-secondary")">
+                                @(aluno.Ativo ? "Ativo" : "Inativo")
+                            </span>
+                        </div>
+                    </div>
+
+                    <h3 class="h6 mb-3">Cursos e frequência</h3>
+
+                    @if (aluno.Matriculas.Count == 0)
+                    {
+                        <div class="alert alert-info mb-0">
+                            O aluno não possui matrículas.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="vstack gap-3">
+                            @foreach (var matricula in aluno.Matriculas)
+                            {
+                                <div class="border rounded p-3">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                                        <div>
+                                            <strong class="d-block">@matricula.CursoNome</strong>
+                                            <span class="text-secondary small">@matricula.TurmaNome</span>
+                                        </div>
+
+                                        <span class="badge text-bg-light">@matricula.Situacao</span>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-sm-4">
+                                            <span class="text-secondary small d-block">Frequência</span>
+                                            <strong>
+                                                @(matricula.TotalPresencas == 0
+                                                    ? "Sem registros"
+                                                    : $"{matricula.FrequenciaPercentual}%")
+                                            </strong>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <span class="text-secondary small d-block">Presenças</span>
+                                            <strong>@matricula.TotalPresentes</strong>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <span class="text-secondary small d-block">Aulas registradas</span>
+                                            <strong>@matricula.TotalPresencas</strong>
+                                        </div>
+                                    </div>
+
+                                    @if (matricula.Presencas.Count > 0)
+                                    {
+                                        <details>
+                                            <summary class="text-primary">Ver histórico de presença</summary>
+
+                                            <div class="table-responsive mt-3">
+                                                <table class="table table-sm align-middle mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Data</th>
+                                                            <th>Situação</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var presenca in matricula.Presencas)
+                                                        {
+                                                            <tr>
+                                                                <td>@presenca.Data.ToString("dd/MM/yyyy")</td>
+                                                                <td>
+                                                                    <span
+                                                                        class="badge @(presenca.Presente ? "text-bg-success" : "text-bg-danger")">
+                                                                        @(presenca.Presente ? "Presente" : "Ausente")
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </details>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@foreach (var aluno in Model.Alunos)
+{
+    <div class="modal fade" id="modalNotas-@aluno.MatriculaId" tabindex="-1"
+         aria-labelledby="tituloModalNotas-@aluno.MatriculaId" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-action="SalvarNotas" method="post">
+                    <div class="modal-header">
+                        <div>
+                            <h2 class="modal-title fs-5" id="tituloModalNotas-@aluno.MatriculaId">
+                                @aluno.Nome
+                            </h2>
+                            <p class="text-secondary small mb-0">Notas da matrícula</p>
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="MatriculaId" value="@aluno.MatriculaId" />
+                        <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
+                        <input type="hidden" name="__Invariant" value="Nota1" />
+                        <input type="hidden" name="__Invariant" value="Nota2" />
+                        <input type="hidden" name="__Invariant" value="Nota3" />
+                        <input type="hidden" name="__Invariant" value="Recuperacao" />
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label" for="nota1-@aluno.MatriculaId">Nota 1</label>
+                                <input class="form-control" id="nota1-@aluno.MatriculaId" name="Nota1" type="number" min="0"
+                                       max="10" step="0.01"
+                                       value="@(aluno.Nota1?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" />
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="form-label" for="nota2-@aluno.MatriculaId">Nota 2</label>
+                                <input class="form-control" id="nota2-@aluno.MatriculaId" name="Nota2" type="number" min="0"
+                                       max="10" step="0.01"
+                                       value="@(aluno.Nota2?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" />
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="form-label" for="nota3-@aluno.MatriculaId">Nota 3</label>
+                                <input class="form-control" id="nota3-@aluno.MatriculaId" name="Nota3" type="number" min="0"
+                                       max="10" step="0.01"
+                                       value="@(aluno.Nota3?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" />
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="form-label" for="recuperacao-@aluno.MatriculaId">Recuperação</label>
+                                <input class="form-control" id="recuperacao-@aluno.MatriculaId" name="Recuperacao"
+                                       type="number" min="0" max="10" step="0.01"
+                                       value="@(aluno.Recuperacao?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Salvar notas
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

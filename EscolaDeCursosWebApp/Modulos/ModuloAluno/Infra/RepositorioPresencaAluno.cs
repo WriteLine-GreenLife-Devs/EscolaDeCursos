@@ -8,6 +8,8 @@ public sealed class RepositorioPresencaAluno(
     : RepositorioBase<PresencaAluno>(dbContext),
       IRepositorioPresencaAluno
 {
+    private readonly EscolaDeCursosDbContext contexto = dbContext;
+
     public override List<PresencaAluno> SelecionarTodos()
     {
         return registros
@@ -22,5 +24,11 @@ public sealed class RepositorioPresencaAluno(
             .Where(filtro)
             .OrderBy(presenca => presenca.DataAula)
             .ToList();
+    }
+
+    public void SalvarAlteracoes(List<PresencaAluno> presencasNovas)
+    {
+        registros.AddRange(presencasNovas);
+        contexto.SaveChanges();
     }
 }

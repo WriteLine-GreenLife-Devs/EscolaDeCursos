@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
 using FluentResults;
@@ -13,7 +14,10 @@ namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
 public sealed class ProfessorController(
     ServicoTurma servicoTurma,
     ServicoMatricula servicoMatricula,
-    ServicoProfessor servicoProfessor
+    ServicoProfessor servicoProfessor,
+    ServicoNotaAluno servicoNotaAluno,
+    ServicoAluno servicoAluno,
+    ServicoPresencaAluno servicoPresencaAluno
 ) : Controller
 {
     [HttpGet]
@@ -54,7 +58,14 @@ public sealed class ProfessorController(
             NomeProfessor = User.Identity?.Name ?? "Professor",
             Perfil = perfil,
             PerfilCadastrado = servicoProfessor.SelecionarPorId(professorId) != null,
-            Turmas = turmas
+            Cursos = turmas
+                .GroupBy(turma => turma.CursoNome)
+                .Select(grupo => new CursoProfessorViewModel(
+                    grupo.Key,
+                    grupo.Sum(turma => turma.TotalAlunos),
+                    grupo.ToList()))
+                .OrderBy(curso => curso.Nome)
+                .ToList()
         };
 
         return View(viewModel);
@@ -115,22 +126,216 @@ public sealed class ProfessorController(
         if (turma == null)
             return NotFound();
 
+        TurmaProfessorViewModel? turmaResumo = servicoTurma
+            .SelecionarPorProfessor(professorId)
+            .Where(turmaProfessor => turmaProfessor.Id == id)
+            .Select(turmaProfessor => new TurmaProfessorViewModel(
+                turmaProfessor.Id,
+                turmaProfessor.Nome,
+                turmaProfessor.CursoNome,
+                turmaProfessor.DataInicio,
+                turmaProfessor.DataFim,
+                turmaProfessor.HorarioTurno,
+                turmaProfessor.Status,
+                turmaProfessor.TotalAlunos))
+            .SingleOrDefault();
+
+        if (turmaResumo == null)
+            return NotFound();
+
+        List<AlunoTurmaProfessorViewModel> alunos = turma.Matriculas
+            .Select(matricula =>
+            {
+                FichaNotasAlunoDto? ficha = servicoNotaAluno
+                    .SelecionarFicha(matricula.MatriculaId);
+
+                DetalhesAlunoDto? aluno = servicoAluno
+                    .SelecionarPorId(matricula.AlunoId);
+
+                List<MatriculaAlunoProfessorViewModel> matriculas = servicoAluno
+                    .SelecionarMatriculas(matricula.AlunoId)
+                    .Select(matriculaAluno =>
+                    {
+                        List<PresencaAlunoDto> presencas = servicoPresencaAluno
+                            .SelecionarPorMatricula(matriculaAluno.Id);
+
+                        int totalPresentes = presencas.Count(presenca =>
+                            presenca.Presente);
+
+                        int frequenciaPercentual = presencas.Count == 0
+                            ? 0
+                            : (int)Math.Round(
+                                totalPresentes * 100d / presencas.Count);
+
+                        return new MatriculaAlunoProfessorViewModel(
+                            matriculaAluno.Id,
+                            matriculaAluno.Curso.Nome,
+                            matriculaAluno.Turma.Nome,
+                            matriculaAluno.Situacao,
+                            frequenciaPercentual,
+                            presencas.Count,
+                            totalPresentes,
+                            presencas
+                                .Select(presenca =>
+                                    new PresencaAlunoProfessorViewModel(
+                                        presenca.DataAula,
+                                        presenca.Presente))
+                                .OrderByDescending(presenca => presenca.Data)
+                                .ToList());
+                    })
+                    .OrderBy(matriculaAluno => matriculaAluno.CursoNome)
+                    .ThenBy(matriculaAluno => matriculaAluno.TurmaNome)
+                    .ToList();
+
+                return new AlunoTurmaProfessorViewModel(
+                    matricula.MatriculaId,
+                    matricula.AlunoId,
+                    matricula.AlunoNome,
+                    aluno?.Email ?? string.Empty,
+                    aluno?.Telefone ?? string.Empty,
+                    aluno?.Ativo ?? false,
+                    matricula.DataMatricula,
+                    ficha?.Situacao ?? matricula.Situacao,
+                    ficha?.Nota1,
+                    ficha?.Nota2,
+                    ficha?.Nota3,
+                    ficha?.Recuperacao,
+                    ficha?.NotaFinal,
+                    matriculas);
+            })
+            .OrderBy(aluno => aluno.Nome)
+            .ToList();
+
+        List<DateTime> datasChamadas = alunos
+            .SelectMany(aluno => aluno.Matriculas
+                .Where(matricula => matricula.Id == aluno.MatriculaId)
+                .SelectMany(matricula => matricula.Presencas))
+            .Select(presenca => presenca.Data.Date)
+            .Distinct()
+            .OrderByDescending(data => data)
+            .ToList();
+
         var viewModel = new DetalhesTurmaProfessorViewModel
         {
             TurmaId = turma.TurmaId,
             TurmaNome = turma.TurmaNome,
+            DataInicio = turmaResumo.DataInicio,
+            DataFim = turmaResumo.DataFim,
             VagasMaximas = turma.VagasMaximas,
-            Alunos = turma.Matriculas
-                .Select(matricula => new AlunoTurmaProfessorViewModel(
-                    matricula.MatriculaId,
-                    matricula.AlunoNome,
-                    matricula.DataMatricula,
-                    matricula.Situacao))
-                .OrderBy(aluno => aluno.Nome)
+            Alunos = alunos,
+            Chamadas = datasChamadas
+                .Select(data => new ChamadaProfessorViewModel(
+                    data,
+                    alunos
+                        .Where(aluno => aluno.DataMatricula.Date <= data)
+                        .Select(aluno =>
+                        {
+                            PresencaAlunoProfessorViewModel? presenca = aluno
+                                .Matriculas
+                                .Single(matricula =>
+                                    matricula.Id == aluno.MatriculaId)
+                                .Presencas
+                                .SingleOrDefault(registro =>
+                                    registro.Data.Date == data);
+
+                            return new AlunoChamadaProfessorViewModel(
+                                aluno.MatriculaId,
+                                aluno.Nome,
+                                presenca?.Presente);
+                        })
+                        .ToList()))
                 .ToList()
         };
 
         return View(viewModel);
+    }
+
+    [HttpPost]
+    public ActionResult SalvarNotas(SalvarNotasProfessorViewModel viewModel)
+    {
+        if (!TentarObterProfessorId(out Guid professorId))
+            return Forbid();
+
+        if (!ModelState.IsValid)
+        {
+            TempData["MensagemNotasErro"] =
+                "As notas devem estar entre 0 e 10.";
+
+            return RedirectToAction(
+                nameof(DetalhesTurma),
+                new { id = viewModel.TurmaId });
+        }
+
+        Result resultado = servicoNotaAluno.SalvarNotasDoProfessor(
+            new SalvarNotasAlunoDto(
+                viewModel.MatriculaId,
+                viewModel.Nota1,
+                viewModel.Nota2,
+                viewModel.Nota3,
+                viewModel.Recuperacao),
+            professorId);
+
+        if (resultado.IsFailed)
+        {
+            TempData["MensagemNotasErro"] =
+                resultado.Errors.First().Message;
+
+            return RedirectToAction(
+                nameof(DetalhesTurma),
+                new { id = viewModel.TurmaId });
+        }
+
+        TempData["MensagemNotasSucesso"] =
+            "Notas atualizadas com sucesso.";
+
+        return RedirectToAction(
+            nameof(DetalhesTurma),
+            new { id = viewModel.TurmaId });
+    }
+
+    [HttpPost]
+    public ActionResult SalvarChamada(SalvarChamadaProfessorViewModel viewModel)
+    {
+        if (!TentarObterProfessorId(out Guid professorId))
+            return Forbid();
+
+        if (!ModelState.IsValid)
+        {
+            TempData["MensagemChamadaErro"] =
+                "Verifique os dados informados na chamada.";
+
+            return RedirectToAction(
+                nameof(DetalhesTurma),
+                new { id = viewModel.TurmaId });
+        }
+
+        Result resultado = servicoPresencaAluno.SalvarChamadaDoProfessor(
+            new SalvarChamadaAlunoDto(
+                viewModel.TurmaId,
+                viewModel.DataAula,
+                viewModel.Alunos
+                    .Select(aluno => new PresencaChamadaAlunoDto(
+                        aluno.MatriculaId,
+                        aluno.Presente))
+                    .ToList()),
+            professorId);
+
+        if (resultado.IsFailed)
+        {
+            TempData["MensagemChamadaErro"] =
+                resultado.Errors.First().Message;
+
+            return RedirectToAction(
+                nameof(DetalhesTurma),
+                new { id = viewModel.TurmaId });
+        }
+
+        TempData["MensagemChamadaSucesso"] =
+            "Chamada salva com sucesso.";
+
+        return RedirectToAction(
+            nameof(DetalhesTurma),
+            new { id = viewModel.TurmaId });
     }
 
     private bool TentarObterProfessorId(out Guid professorId)

@@ -1,6 +1,7 @@
 using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using FluentResults;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
@@ -10,15 +11,18 @@ public sealed class ServicoPresencaAluno : ServicoBase<PresencaAluno>
     private readonly IRepositorioAluno repositorioAluno;
     private readonly IRepositorioPresencaAluno repositorioPresencaAluno;
     private readonly IRepositorioMatricula repositorioMatricula;
+    private readonly IRepositorioTurma repositorioTurma;
 
     public ServicoPresencaAluno(
         IRepositorioAluno repositorioAluno,
         IRepositorioPresencaAluno repositorioPresencaAluno,
-        IRepositorioMatricula repositorioMatricula)
+        IRepositorioMatricula repositorioMatricula,
+        IRepositorioTurma repositorioTurma)
     {
         this.repositorioAluno = repositorioAluno;
         this.repositorioPresencaAluno = repositorioPresencaAluno;
         this.repositorioMatricula = repositorioMatricula;
+        this.repositorioTurma = repositorioTurma;
     }
 
     public Result Registrar(RegistrarPresencaAlunoDto dto)
@@ -106,6 +110,101 @@ public sealed class ServicoPresencaAluno : ServicoBase<PresencaAluno>
             .OrderBy(presenca => presenca.DataAula)
             .Select(MapearPresenca)
             .ToList();
+    }
+
+    public Result SalvarChamadaDoProfessor(
+        SalvarChamadaAlunoDto dto,
+        Guid professorId)
+    {
+        Turma? turma = repositorioTurma.SelecionarPorId(dto.TurmaId);
+
+        if (turma == null || turma.instrutorId != professorId)
+            return Falha(nameof(dto.TurmaId), "A turma não pertence a este professor.");
+
+        DateTime dataAula = dto.DataAula.Date;
+
+        if (dataAula < turma.dataInicio.Date || dataAula > turma.dataFim.Date)
+            return Falha(nameof(dto.DataAula), "A data da aula deve estar dentro do período da turma.");
+
+        if (dataAula > DateTime.Today)
+            return Falha(nameof(dto.DataAula), "A presença não pode ser registrada em uma data futura.");
+
+        List<Matricula> matriculasDaTurma = repositorioMatricula
+            .Filtrar(matricula => matricula.TurmaId == dto.TurmaId);
+
+        if (matriculasDaTurma.Count == 0)
+            return Falha(nameof(dto.TurmaId), "A turma não possui alunos matriculados.");
+
+        if (dto.Alunos
+            .GroupBy(aluno => aluno.MatriculaId)
+            .Any(grupo => grupo.Count() > 1))
+        {
+            return Falha(nameof(dto.Alunos), "A chamada possui matrículas duplicadas.");
+        }
+
+        HashSet<Guid> idsMatriculasDaTurma = matriculasDaTurma
+            .Select(matricula => matricula.Id)
+            .ToHashSet();
+
+        if (dto.Alunos.Any(aluno =>
+            !idsMatriculasDaTurma.Contains(aluno.MatriculaId)))
+        {
+            return Falha(nameof(dto.Alunos), "A chamada contém uma matrícula que não pertence à turma.");
+        }
+
+        List<Matricula> matriculasElegiveis = matriculasDaTurma
+            .Where(matricula => matricula.DataMatricula.Date <= dataAula)
+            .ToList();
+
+        if (matriculasElegiveis.Count == 0)
+            return Falha(nameof(dto.DataAula), "Não havia alunos matriculados na data da aula.");
+
+        Dictionary<Guid, PresencaChamadaAlunoDto> alunosInformados = dto.Alunos
+            .Where(aluno => matriculasElegiveis.Any(matricula =>
+                matricula.Id == aluno.MatriculaId))
+            .ToDictionary(aluno => aluno.MatriculaId);
+
+        if (alunosInformados.Count != matriculasElegiveis.Count)
+            return Falha(nameof(dto.Alunos), "Informe a presença de todos os alunos matriculados na data da aula.");
+
+        List<PresencaAluno> presencasExistentes = repositorioPresencaAluno
+            .Filtrar(presenca =>
+                presenca.DataAula.Date == dataAula &&
+                idsMatriculasDaTurma.Contains(presenca.MatriculaId));
+
+        List<PresencaAluno> presencasNovas = [];
+
+        foreach (Matricula matricula in matriculasElegiveis)
+        {
+            PresencaChamadaAlunoDto alunoInformado =
+                alunosInformados[matricula.Id];
+
+            var presencaAtualizada = new PresencaAluno(
+                matricula.AlunoId,
+                matricula.Id,
+                dataAula,
+                alunoInformado.Presente);
+
+            Result resultadoValidacao = ValidarPresenca(
+                presencaAtualizada,
+                matricula);
+
+            if (resultadoValidacao.IsFailed)
+                return resultadoValidacao;
+
+            PresencaAluno? presencaExistente = presencasExistentes
+                .SingleOrDefault(presenca =>
+                    presenca.MatriculaId == matricula.Id);
+
+            if (presencaExistente == null)
+                presencasNovas.Add(presencaAtualizada);
+            else
+                presencaExistente.Atualizar(presencaAtualizada);
+        }
+
+        repositorioPresencaAluno.SalvarAlteracoes(presencasNovas);
+
+        return Result.Ok();
     }
 
     private Matricula? SelecionarMatriculaDoAluno(Guid matriculaId)

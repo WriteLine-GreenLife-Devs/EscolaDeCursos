@@ -46,7 +46,7 @@
                 Meu perfil
             </button>
 
-            <form action="/ModuloUsuario/Apresentacao/Logout" method="post">
+            <form asp-controller="Usuario" asp-action="Logout" method="post">
                 <button type="submit" class="btn btn-outline-danger">
                     Sair
                 </button>
@@ -191,11 +191,12 @@
                             <div class="modal-body">
                                 <dl class="row g-2 mb-3">
                                     <dt class="col-4">Email</dt>
-                                    <dd class="col-8 text-break">@(string.IsNullOrWhiteSpace(matricula.Professor.Email) ? "-" : matricula.Professor.Email)</dd>
+                                    <dd class="col-8 text-break">@(string.IsNullOrWhiteSpace(matricula.Professor.Email) ? "-" :
+                                                                        matricula.Professor.Email)</dd>
 
-                                    <dt class="col-4">Especialidades</dt>
-                                    <dd class="col-8">@(string.IsNullOrWhiteSpace(matricula.Professor.Especialidades) ? "Não informado" : matricula.Professor.Especialidades)</dd>
-                                </dl>
+                                        <dt class="col-4">Especialidades</dt>
+                                        <dd class="col-8">@(string.IsNullOrWhiteSpace(matricula.Professor.Especialidades) ? "Não informado" : matricula.Professor.Especialidades)</dd>
+                                    </dl>
 
                                     <h3 class="h6">Biografia profissional</h3>
                                     <p class="mb-0">

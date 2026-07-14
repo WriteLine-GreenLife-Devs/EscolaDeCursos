@@ -8,6 +8,8 @@ public sealed class RepositorioNotaAluno(
     : RepositorioBase<NotaAluno>(dbContext),
       IRepositorioNotaAluno
 {
+    private readonly EscolaDeCursosDbContext contexto = dbContext;
+
     public override List<NotaAluno> SelecionarTodos()
     {
         return registros
@@ -24,5 +26,15 @@ public sealed class RepositorioNotaAluno(
             .OrderBy(nota => nota.DataLancamento)
             .ThenBy(nota => nota.TipoNota)
             .ToList();
+    }
+
+    public void SalvarAlteracoes(
+        List<NotaAluno> notasNovas,
+        List<NotaAluno> notasRemovidas)
+    {
+        registros.AddRange(notasNovas);
+        registros.RemoveRange(notasRemovidas);
+
+        contexto.SaveChanges();
     }
 }

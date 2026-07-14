@@ -11,14 +11,15 @@
                 <p class="text-secondary mb-0">Use seu email e senha para entrar.</p>
             </div>
 
-            <form action="/ModuloUsuario/Apresentacao/Login" method="post">
-                @if(TempData["LoginError"] != null)
+            <form asp-controller="Usuario" asp-action="Login" method="post">
+                @if (TempData["LoginError"] != null)
                 {
                     <div class="alert alert-danger">@TempData["LoginError"]</div>
                 }
                 <div class="mb-3">
                     <label for="Email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="Email" name="Email" placeholder="seu@email.com" required>
+                    <input type="email" class="form-control" id="Email" name="Email" placeholder="seu@email.com"
+                           required>
                 </div>
 
                 <div class="mb-4">
@@ -28,7 +29,8 @@
 
                 <div class="d-grid gap-3">
                     <button type="submit" class="btn btn-primary btn-lg">Login</button>
-                    <a class="btn btn-outline-secondary btn-lg" asp-controller="Usuario" asp-action="CadastrarAluno">Cadastrar como aluno</a>
+                    <a class="btn btn-outline-secondary btn-lg" asp-controller="Usuario"
+                       asp-action="CadastrarAluno">Cadastrar como aluno</a>
                 </div>
             </form>
         </div>

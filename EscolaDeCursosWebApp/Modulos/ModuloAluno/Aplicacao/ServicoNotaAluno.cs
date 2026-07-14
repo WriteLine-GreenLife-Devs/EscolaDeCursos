@@ -1,6 +1,7 @@
 using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using FluentResults;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
@@ -10,15 +11,18 @@ public sealed class ServicoNotaAluno : ServicoBase<NotaAluno>
     private readonly IRepositorioAluno repositorioAluno;
     private readonly IRepositorioNotaAluno repositorioNotaAluno;
     private readonly IRepositorioMatricula repositorioMatricula;
+    private readonly IRepositorioTurma repositorioTurma;
 
     public ServicoNotaAluno(
         IRepositorioAluno repositorioAluno,
         IRepositorioNotaAluno repositorioNotaAluno,
-        IRepositorioMatricula repositorioMatricula)
+        IRepositorioMatricula repositorioMatricula,
+        IRepositorioTurma repositorioTurma)
     {
         this.repositorioAluno = repositorioAluno;
         this.repositorioNotaAluno = repositorioNotaAluno;
         this.repositorioMatricula = repositorioMatricula;
+        this.repositorioTurma = repositorioTurma;
     }
 
     public Result Cadastrar(CadastrarNotaAlunoDto dto)
@@ -155,6 +159,114 @@ public sealed class ServicoNotaAluno : ServicoBase<NotaAluno>
             .OrderBy(nota => nota.TipoNota)
             .Select(MapearNota)
             .ToList();
+    }
+
+    public FichaNotasAlunoDto? SelecionarFicha(Guid matriculaId)
+    {
+        Matricula? matricula = SelecionarMatriculaDoAluno(matriculaId);
+
+        if (matricula == null)
+            return null;
+
+        List<NotaAluno> notas = SelecionarNotas(matriculaId);
+
+        return new FichaNotasAlunoDto(
+            matricula.Id,
+            SelecionarValorNota(notas, TipoNotaAluno.Nota1) ?? matricula.Nota1,
+            SelecionarValorNota(notas, TipoNotaAluno.Nota2) ?? matricula.Nota2,
+            SelecionarValorNota(notas, TipoNotaAluno.Nota3) ?? matricula.Nota3,
+            SelecionarValorNota(notas, TipoNotaAluno.Recuperacao) ?? matricula.Recuperacao,
+            matricula.NotaFinal,
+            matricula.Situacao);
+    }
+
+    public Result SalvarNotasDoProfessor(
+        SalvarNotasAlunoDto dto,
+        Guid professorId)
+    {
+        Matricula? matricula = SelecionarMatriculaDoAluno(dto.MatriculaId);
+
+        if (matricula == null)
+            return Falha(nameof(dto.MatriculaId), "Matrícula de aluno não encontrada.");
+
+        Turma? turma = repositorioTurma.SelecionarPorId(matricula.TurmaId);
+
+        if (turma == null || turma.instrutorId != professorId)
+            return Falha(nameof(dto.MatriculaId), "A matrícula não pertence a uma turma deste professor.");
+
+        return SalvarNotas(dto, matricula);
+    }
+
+    private Result SalvarNotas(
+        SalvarNotasAlunoDto dto,
+        Matricula matricula)
+    {
+        if (matricula.Situacao == SituacaoMatricula.Trancado)
+            return Falha(nameof(dto.MatriculaId), "Não é possível editar notas de uma matrícula trancada.");
+
+        List<NotaAluno> notasRegistradas = SelecionarNotas(matricula.Id);
+        List<NotaAluno> notasNovas = [];
+        List<NotaAluno> notasRemovidas = [];
+
+        (TipoNotaAluno Tipo, string Descricao, double? Valor)[] valores =
+        [
+            (TipoNotaAluno.Nota1, "Nota 1", dto.Nota1),
+            (TipoNotaAluno.Nota2, "Nota 2", dto.Nota2),
+            (TipoNotaAluno.Nota3, "Nota 3", dto.Nota3),
+            (TipoNotaAluno.Recuperacao, "Recuperação", dto.Recuperacao)
+        ];
+
+        foreach (var valorNota in valores)
+        {
+            NotaAluno? notaRegistrada = notasRegistradas.SingleOrDefault(nota =>
+                nota.TipoNota == valorNota.Tipo);
+
+            if (!valorNota.Valor.HasValue)
+            {
+                if (notaRegistrada != null)
+                    notasRemovidas.Add(notaRegistrada);
+
+                continue;
+            }
+
+            var notaAtualizada = new NotaAluno(
+                matricula.AlunoId,
+                matricula.Id,
+                valorNota.Tipo,
+                valorNota.Descricao,
+                valorNota.Valor.Value,
+                notaRegistrada?.DataLancamento ?? DateTime.Today);
+
+            Result resultadoValidacao = ValidarNota(
+                notaAtualizada,
+                matricula);
+
+            if (resultadoValidacao.IsFailed)
+                return resultadoValidacao;
+
+            if (notaRegistrada == null)
+                notasNovas.Add(notaAtualizada);
+            else
+                notaRegistrada.Atualizar(notaAtualizada);
+        }
+
+        List<NotaAluno> notasFinais = notasRegistradas
+            .Except(notasRemovidas)
+            .Concat(notasNovas)
+            .ToList();
+
+        Result resultadoCalculo = SincronizarResumoMatricula(
+            matricula,
+            notasFinais);
+
+        if (resultadoCalculo.IsFailed)
+            return resultadoCalculo;
+
+        repositorioNotaAluno.SalvarAlteracoes(
+            notasNovas,
+            notasRemovidas);
+
+        return Result.Ok();
     }
 
     private Matricula? SelecionarMatriculaDoAluno(Guid matriculaId)

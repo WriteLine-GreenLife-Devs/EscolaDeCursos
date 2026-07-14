@@ -114,6 +114,24 @@ public record NotaAlunoDto(
     DateTime DataLancamento
 );
 
+public record SalvarNotasAlunoDto(
+    Guid MatriculaId,
+    double? Nota1,
+    double? Nota2,
+    double? Nota3,
+    double? Recuperacao
+);
+
+public record FichaNotasAlunoDto(
+    Guid MatriculaId,
+    double? Nota1,
+    double? Nota2,
+    double? Nota3,
+    double? Recuperacao,
+    double? NotaFinal,
+    SituacaoMatricula Situacao
+);
+
 public record RegistrarPresencaAlunoDto(
     Guid MatriculaId,
     DateTime DataAula,
@@ -132,4 +150,15 @@ public record PresencaAlunoDto(
     Guid MatriculaId,
     DateTime DataAula,
     bool Presente
+);
+
+public record PresencaChamadaAlunoDto(
+    Guid MatriculaId,
+    bool Presente
+);
+
+public record SalvarChamadaAlunoDto(
+    Guid TurmaId,
+    DateTime DataAula,
+    List<PresencaChamadaAlunoDto> Alunos
 );

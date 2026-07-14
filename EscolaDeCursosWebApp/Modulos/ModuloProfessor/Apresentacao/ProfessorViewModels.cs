@@ -72,8 +72,14 @@ public sealed class PainelProfessorViewModel
     public string NomeProfessor { get; init; } = string.Empty;
     public DetalhesProfessorViewModel? Perfil { get; init; }
     public bool PerfilCadastrado { get; init; }
-    public List<TurmaProfessorViewModel> Turmas { get; init; } = [];
+    public List<CursoProfessorViewModel> Cursos { get; init; } = [];
 }
+
+public sealed record CursoProfessorViewModel(
+    string Nome,
+    int TotalAlunos,
+    List<TurmaProfessorViewModel> Turmas
+);
 
 public sealed record TurmaProfessorViewModel(
     Guid Id,
@@ -90,13 +96,94 @@ public sealed class DetalhesTurmaProfessorViewModel
 {
     public Guid TurmaId { get; init; }
     public string TurmaNome { get; init; } = string.Empty;
+    public DateTime DataInicio { get; init; }
+    public DateTime DataFim { get; init; }
     public int VagasMaximas { get; init; }
     public List<AlunoTurmaProfessorViewModel> Alunos { get; init; } = [];
+    public List<ChamadaProfessorViewModel> Chamadas { get; init; } = [];
 }
 
 public sealed record AlunoTurmaProfessorViewModel(
     Guid MatriculaId,
+    Guid AlunoId,
     string Nome,
+    string Email,
+    string Telefone,
+    bool Ativo,
     DateTime DataMatricula,
-    SituacaoMatricula Situacao
+    SituacaoMatricula Situacao,
+    double? Nota1,
+    double? Nota2,
+    double? Nota3,
+    double? Recuperacao,
+    double? NotaFinal,
+    List<MatriculaAlunoProfessorViewModel> Matriculas
 );
+
+public sealed record MatriculaAlunoProfessorViewModel(
+    Guid Id,
+    string CursoNome,
+    string TurmaNome,
+    SituacaoMatricula Situacao,
+    int FrequenciaPercentual,
+    int TotalPresencas,
+    int TotalPresentes,
+    List<PresencaAlunoProfessorViewModel> Presencas
+);
+
+public sealed record PresencaAlunoProfessorViewModel(
+    DateTime Data,
+    bool Presente
+);
+
+public sealed record ChamadaProfessorViewModel(
+    DateTime Data,
+    List<AlunoChamadaProfessorViewModel> Alunos
+);
+
+public sealed record AlunoChamadaProfessorViewModel(
+    Guid MatriculaId,
+    string Nome,
+    bool? Presente
+);
+
+public sealed class SalvarChamadaProfessorViewModel
+{
+    [Required]
+    public Guid TurmaId { get; set; }
+
+    [Required]
+    [DataType(DataType.Date)]
+    public DateTime DataAula { get; set; }
+
+    public List<PresencaChamadaProfessorViewModel> Alunos { get; set; } = [];
+}
+
+public sealed class PresencaChamadaProfessorViewModel
+{
+    [Required]
+    public Guid MatriculaId { get; set; }
+
+    public bool Presente { get; set; }
+}
+
+public sealed class SalvarNotasProfessorViewModel
+{
+    [Required]
+    public Guid MatriculaId { get; set; }
+
+    [Required]
+    public Guid TurmaId { get; set; }
+
+    [Range(0, 10)]
+    public double? Nota1 { get; set; }
+
+    [Range(0, 10)]
+    public double? Nota2 { get; set; }
+
+    [Range(0, 10)]
+    public double? Nota3 { get; set; }
+
+    [Range(0, 10)]
+    public double? Recuperacao { get; set; }
+}
