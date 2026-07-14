@@ -21,6 +21,16 @@ public sealed class RepositorioMatricula :
         Matricula matricula,
         int vagasMaximas)
     {
+        var estrategiaExecucao = contexto.Database.CreateExecutionStrategy();
+
+        return estrategiaExecucao.Execute(() =>
+            CadastrarEmTransacao(matricula, vagasMaximas));
+    }
+
+    private ResultadoCadastroMatricula CadastrarEmTransacao(
+        Matricula matricula,
+        int vagasMaximas)
+    {
         using var transacao = contexto.Database.BeginTransaction(
             IsolationLevel.Serializable);
 
