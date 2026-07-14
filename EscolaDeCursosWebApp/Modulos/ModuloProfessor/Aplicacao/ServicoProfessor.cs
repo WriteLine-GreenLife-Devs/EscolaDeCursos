@@ -19,6 +19,51 @@ public sealed class ServicoProfessor
         this.repositorioUsuario = repositorioUsuario;
     }
 
+    public Result Cadastrar(CadastrarProfessorDto dto)
+    {
+        var usuario = new Usuario(
+            dto.Nome,
+            dto.Email,
+            dto.Senha,
+            dto.Telefone,
+            TipoUsuario.Professor
+        );
+
+        List<string> errosUsuario = usuario.Validar();
+
+        if (errosUsuario.Count > 0)
+            return MapearFalhaUsuario(errosUsuario.First());
+
+        List<Usuario> usuarios = repositorioUsuario.SelecionarTodos();
+
+        if (usuarios.Any(u => string.Equals(
+            u.email,
+            usuario.email,
+            StringComparison.OrdinalIgnoreCase)))
+        {
+            return Falha(nameof(dto.Email), "Já existe um usuário com esse email.");
+        }
+
+        if (usuarios.Any(u => u.telefone == usuario.telefone))
+            return Falha(nameof(dto.Telefone), "Já existe um usuário com esse telefone.");
+
+        var professor = new Professor(
+            usuario.Id,
+            dto.Bio,
+            dto.Especialidades,
+            dto.DataContratacao
+        );
+
+        Result resultadoValidacao = ValidarEntidade(professor);
+
+        if (resultadoValidacao.IsFailed)
+            return resultadoValidacao;
+
+        repositorioProfessor.CadastrarProfessor(usuario, professor);
+
+        return Result.Ok();
+    }
+
     public Result Cadastrar(CadastrarProfessorPerfilDto dto)
     {
         if (dto.UsuarioId == Guid.Empty)
@@ -206,5 +251,16 @@ public sealed class ServicoProfessor
             perfil.Especialidades,
             perfil.DataContratacao
         );
+    }
+
+    private static Result MapearFalhaUsuario(string erro)
+    {
+        string campo = erro.Contains("Nome") ? nameof(CadastrarProfessorDto.Nome)
+            : erro.Contains("Telefone") ? nameof(CadastrarProfessorDto.Telefone)
+            : erro.Contains("Email") ? nameof(CadastrarProfessorDto.Email)
+            : erro.Contains("Senha") ? nameof(CadastrarProfessorDto.Senha)
+            : string.Empty;
+
+        return Falha(campo, erro);
     }
 }

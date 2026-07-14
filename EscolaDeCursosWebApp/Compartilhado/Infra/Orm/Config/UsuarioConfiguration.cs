@@ -36,6 +36,10 @@ public sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
             .HasConversion<int>()
             .IsRequired();
 
+        builder.Property(c => c.ativo)
+            .HasDefaultValue(true)
+            .IsRequired();
+
         builder.HasIndex(c => c.email)
             .IsUnique()
             .HasDatabaseName("UQ_TBUsuario_Email");

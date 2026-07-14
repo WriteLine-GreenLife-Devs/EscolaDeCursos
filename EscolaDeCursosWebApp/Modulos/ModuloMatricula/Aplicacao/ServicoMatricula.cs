@@ -34,7 +34,7 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
             return Falha(nameof(dto.TurmaId), "Turma não encontrada.");
 
         var aluno = repositorioUsuario.SelecionarPorId(dto.AlunoId);
-        if (aluno == null || aluno.tipoUsuario != TipoUsuario.Aluno)
+        if (aluno == null || aluno.tipoUsuario != TipoUsuario.Aluno || !aluno.ativo)
             return Falha(nameof(dto.AlunoId), "Aluno não encontrado ou inválido.");
 
         // contar ocupadas (apenas Cursando ocupam vaga)

@@ -355,7 +355,9 @@ public class ADMController(
         if (detalhe == null)
             return RedirectToAction("ListarTurmas");
 
-        var alunos = repositorioUsuario.SelecionarTodos().Where(u => u.tipoUsuario == TipoUsuario.Aluno).ToList();
+        var alunos = repositorioUsuario.SelecionarTodos()
+            .Where(u => u.tipoUsuario == TipoUsuario.Aluno && u.ativo)
+            .ToList();
 
         var alunosDisponiveis = alunos
             .Select(a => new { a.Id, a.nome })
@@ -477,7 +479,7 @@ public class ADMController(
     {
         ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
         ViewBag.Professores = repositorioUsuario.SelecionarTodos()
-            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor && u.ativo)
             .OrderBy(u => u.nome)
             .ToList();
 
@@ -489,7 +491,7 @@ public class ADMController(
     {
         ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
         ViewBag.Professores = repositorioUsuario.SelecionarTodos()
-            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor && u.ativo)
             .OrderBy(u => u.nome)
             .ToList();
 
@@ -517,7 +519,8 @@ public class ADMController(
 
         ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
         ViewBag.Professores = repositorioUsuario.SelecionarTodos()
-            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor &&
+                (u.ativo || u.Id == turma.instrutorId))
             .OrderBy(u => u.nome)
             .ToList();
 
@@ -542,7 +545,8 @@ public class ADMController(
     {
         ViewBag.Cursos = repositorioCurso.SelecionarTodos().OrderBy(c => c.nome).ToList();
         ViewBag.Professores = repositorioUsuario.SelecionarTodos()
-            .Where(u => u.tipoUsuario == TipoUsuario.Professor)
+            .Where(u => u.tipoUsuario == TipoUsuario.Professor &&
+                (u.ativo || u.Id == editarVm.instrutorId))
             .OrderBy(u => u.nome)
             .ToList();
 
@@ -611,7 +615,8 @@ public class ADMController(
                 Id = u.Id,
                 Nome = u.nome,
                 Email = u.email,
-                Telefone = u.telefone
+                Telefone = u.telefone,
+                Ativo = u.ativo
             })
             .ToList();
 
@@ -705,7 +710,10 @@ public class ADMController(
             senhaAtualizada,
             editarVm.Telefone,
             TipoUsuario.Aluno
-        );
+        )
+        {
+            ativo = usuario.ativo
+        };
 
         if (!repositorioUsuario.Editar(id, entidadeAtualizada))
         {
@@ -741,8 +749,8 @@ public class ADMController(
         if (!confirmado)
             return RedirectToAction("ListarAlunos");
 
-        if (!repositorioUsuario.Excluir(id))
-            TempData["MensagemErro"] = "Falha ao excluir o aluno.";
+        if (!servicoUsuario.DesativarUsuario(id))
+            TempData["MensagemErro"] = "Falha ao desativar o aluno.";
 
         return RedirectToAction("ListarAlunos");
     }
@@ -765,7 +773,8 @@ public class ADMController(
                     Bio = dados?.Bio ?? string.Empty,
                     Especialidades = dados?.Especialidades ?? string.Empty,
                     DataContratacao = dados?.DataContratacao ?? DateTime.Today,
-                    PerfilCadastrado = servicoProfessor.SelecionarPorId(usuario.Id) != null
+                    PerfilCadastrado = servicoProfessor.SelecionarPorId(usuario.Id) != null,
+                    Ativo = usuario.ativo
                 };
             })
             .ToList();
@@ -810,28 +819,38 @@ public class ADMController(
     [HttpGet]
     public ActionResult CadastrarProfessor()
     {
-        return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Cadastrar.cshtml", new CadastrarUsuarioADMViewModel());
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Cadastrar.cshtml", new CadastrarProfessorADMViewModel());
     }
 
     [HttpPost]
-    public ActionResult CadastrarProfessor(CadastrarUsuarioADMViewModel cadastrarVm)
+    public ActionResult CadastrarProfessor(CadastrarProfessorADMViewModel cadastrarVm)
     {
         if (!ModelState.IsValid)
             return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Cadastrar.cshtml", cadastrarVm);
 
-        var dto = new CadastrarUsuarioDto(
+        var dto = new CadastrarProfessorDto(
             cadastrarVm.Nome,
             cadastrarVm.Email,
             cadastrarVm.Senha,
             cadastrarVm.Telefone,
-            TipoUsuario.Professor
+            cadastrarVm.Bio,
+            cadastrarVm.Especialidades,
+            cadastrarVm.DataContratacao
         );
 
-        var resultado = servicoUsuario.CadastrarUsuario(dto);
+        var resultado = servicoProfessor.Cadastrar(dto);
 
         if (resultado.IsFailed)
         {
-            ModelState.AddModelError(string.Empty, "Não foi possível cadastrar o professor. Verifique os dados e tente novamente.");
+            foreach (var erro in resultado.Errors)
+            {
+                string campo = erro.Metadata.TryGetValue("Campo", out object? valor)
+                    ? valor?.ToString() ?? string.Empty
+                    : string.Empty;
+
+                ModelState.AddModelError(campo, erro.Message);
+            }
+
             return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Cadastrar.cshtml", cadastrarVm);
         }
 
@@ -894,7 +913,10 @@ public class ADMController(
             senhaAtualizada,
             editarVm.Telefone,
             TipoUsuario.Professor
-        );
+        )
+        {
+            ativo = usuario.ativo
+        };
 
         if (!repositorioUsuario.Editar(id, entidadeAtualizada))
         {
@@ -930,8 +952,8 @@ public class ADMController(
         if (!confirmado)
             return RedirectToAction("ListarProfessores");
 
-        if (!repositorioUsuario.Excluir(id))
-            TempData["MensagemErro"] = "Falha ao excluir o professor.";
+        if (!servicoUsuario.DesativarUsuario(id))
+            TempData["MensagemErro"] = "Falha ao desativar o professor.";
 
         return RedirectToAction("ListarProfessores");
     }

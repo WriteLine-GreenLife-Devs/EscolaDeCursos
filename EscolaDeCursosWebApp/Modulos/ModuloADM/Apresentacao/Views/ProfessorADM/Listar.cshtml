@@ -53,7 +53,9 @@ else
                                     data-search-name>
                                 @professor.Nome
                             </button>
-                            <span class="badge text-bg-primary rounded-pill">Professor</span>
+                            <span class="badge @(professor.Ativo ? "text-bg-primary" : "text-bg-secondary") rounded-pill">
+                                @(professor.Ativo ? "Professor" : "Inativo")
+                            </span>
                         </div>
 
                         <dl class="row g-2 mb-4">
@@ -72,7 +74,10 @@ else
                                 Ver perfil
                             </button>
                             <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="EditarProfessor" asp-route-id="@professor.Id">Editar</a>
-                            <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirProfessor" asp-route-id="@professor.Id">Excluir</a>
+                            @if (professor.Ativo)
+                            {
+                                <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirProfessor" asp-route-id="@professor.Id">Desativar</a>
+                            }
                         </div>
                     </div>
                 </div>

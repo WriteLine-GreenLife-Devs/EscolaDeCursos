@@ -9,6 +9,7 @@ public sealed class Usuario : EntidadeBase<Usuario>
     public string senha { get; set; } = string.Empty;
     public string telefone { get; set; } = string.Empty;
     public TipoUsuario tipoUsuario { get; set; } = TipoUsuario.Aluno;
+    public bool ativo { get; set; } = true;
 
     public Usuario() { }
     public Usuario(string nome, string email, string senha, string telefone, TipoUsuario tipoUsuario)
@@ -27,6 +28,7 @@ public sealed class Usuario : EntidadeBase<Usuario>
         senha = entidadeAtualizada.senha;
         telefone = entidadeAtualizada.telefone;
         tipoUsuario = entidadeAtualizada.tipoUsuario;
+        ativo = entidadeAtualizada.ativo;
     }
 
     public string VerificarTelefone(string Telefone)

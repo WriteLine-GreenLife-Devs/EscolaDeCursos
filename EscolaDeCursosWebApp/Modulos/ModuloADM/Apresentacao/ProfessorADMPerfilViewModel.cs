@@ -10,4 +10,5 @@ public sealed class ProfessorADMPerfilViewModel
     public string Especialidades { get; init; } = string.Empty;
     public DateTime DataContratacao { get; init; } = DateTime.Today;
     public bool PerfilCadastrado { get; init; }
+    public bool Ativo { get; init; }
 }

@@ -1,4 +1,4 @@
-@model EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.CadastrarUsuarioADMViewModel
+@model EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.CadastrarProfessorADMViewModel
 
 @{
     Layout = "_LayoutADM";
@@ -32,6 +32,24 @@
                     <label asp-for="Telefone" class="form-label"></label>
                     <input asp-for="Telefone" class="form-control" placeholder="(00) 00000-0000" id="Telefone" />
                     <span asp-validation-for="Telefone" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Especialidades" class="form-label"></label>
+                    <input asp-for="Especialidades" class="form-control" placeholder="Ex.: Desenvolvimento Web, C#" />
+                    <span asp-validation-for="Especialidades" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Bio" class="form-label"></label>
+                    <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Resumo da experiência profissional"></textarea>
+                    <span asp-validation-for="Bio" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DataContratacao" class="form-label"></label>
+                    <input asp-for="DataContratacao" class="form-control" />
+                    <span asp-validation-for="DataContratacao" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">

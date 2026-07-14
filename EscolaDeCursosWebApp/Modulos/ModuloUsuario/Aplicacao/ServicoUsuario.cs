@@ -76,7 +76,32 @@ public class ServicoUsuario : ServicoBase<Usuario>
         if(string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
             return null;
 
-        var encontrados = repositorioUsuario.Filtrar(u => string.Equals(u.email, email, StringComparison.OrdinalIgnoreCase) && u.senha == senha);
+        var encontrados = repositorioUsuario.Filtrar(u =>
+            u.ativo &&
+            string.Equals(u.email, email, StringComparison.OrdinalIgnoreCase) &&
+            u.senha == senha);
+
         return encontrados.FirstOrDefault();
+    }
+
+    public bool DesativarUsuario(Guid id)
+    {
+        Usuario? usuario = repositorioUsuario.SelecionarPorId(id);
+
+        if (usuario == null || !usuario.ativo)
+            return false;
+
+        var usuarioDesativado = new Usuario(
+            usuario.nome,
+            usuario.email,
+            usuario.senha,
+            usuario.telefone,
+            usuario.tipoUsuario
+        )
+        {
+            ativo = false
+        };
+
+        return repositorioUsuario.Editar(id, usuarioDesativado);
     }
 }

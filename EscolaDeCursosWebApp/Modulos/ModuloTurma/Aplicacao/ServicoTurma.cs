@@ -34,7 +34,9 @@ public sealed class ServicoTurma : ServicoBase<Turma>
         if (repositorioCurso.SelecionarPorId(cadastrarTurmaDto.cursoId) == null)
             return Falha(nameof(cadastrarTurmaDto.cursoId), "Curso não encontrado.");
 
-        if (repositorioUsuario.SelecionarPorId(cadastrarTurmaDto.instrutorId) is not Usuario instrutor || instrutor.tipoUsuario != TipoUsuario.Professor)
+        if (repositorioUsuario.SelecionarPorId(cadastrarTurmaDto.instrutorId) is not Usuario instrutor ||
+            instrutor.tipoUsuario != TipoUsuario.Professor ||
+            !instrutor.ativo)
             return Falha(nameof(cadastrarTurmaDto.instrutorId), "Instrutor não encontrado ou inválido.");
 
         var turma = new Turma
@@ -66,7 +68,9 @@ public sealed class ServicoTurma : ServicoBase<Turma>
         if (repositorioCurso.SelecionarPorId(editarTurmaDto.cursoId) == null)
             return Falha(nameof(editarTurmaDto.cursoId), "Curso não encontrado.");
 
-        if (repositorioUsuario.SelecionarPorId(editarTurmaDto.instrutorId) is not Usuario instrutor || instrutor.tipoUsuario != TipoUsuario.Professor)
+        if (repositorioUsuario.SelecionarPorId(editarTurmaDto.instrutorId) is not Usuario instrutor ||
+            instrutor.tipoUsuario != TipoUsuario.Professor ||
+            (!instrutor.ativo && turmaExistente.instrutorId != instrutor.Id))
             return Falha(nameof(editarTurmaDto.instrutorId), "Instrutor não encontrado ou inválido.");
 
         var turmaAtualizada = new Turma

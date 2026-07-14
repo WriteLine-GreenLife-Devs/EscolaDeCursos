@@ -2,14 +2,14 @@
 
 @{
     Layout = "_LayoutADM";
-    ViewBag.Titulo = "Excluir Aluno";
+    ViewBag.Titulo = "Desativar Aluno";
 }
 
 <form class="card border-danger-subtle shadow-sm mx-auto p-4" style="max-width: 620px;" asp-action="ExcluirAluno" asp-route-id="@Model.Id" method="post">
     <input type="hidden" asp-for="Id" />
 
     <div class="alert alert-warning" role="alert">
-        Tem certeza que deseja excluir este aluno?
+        Tem certeza que deseja desativar este aluno? O histórico será preservado e ele não poderá mais entrar no sistema.
     </div>
 
     <div class="mb-3">
@@ -29,6 +29,6 @@
 
     <div class="d-flex justify-content-end gap-2 mt-4">
         <a class="btn btn-outline-secondary rounded-pill px-4" asp-action="ListarAlunos">Voltar</a>
-        <button class="btn btn-danger rounded-pill px-4" type="submit">Excluir</button>
+        <button class="btn btn-danger rounded-pill px-4" type="submit">Desativar</button>
     </div>
 </form>
