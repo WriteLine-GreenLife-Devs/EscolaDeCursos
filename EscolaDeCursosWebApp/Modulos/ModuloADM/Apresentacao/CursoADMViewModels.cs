@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 
@@ -14,5 +13,4 @@ public class CursoADMViewModel
     public StatusCurso Status { get; set; }
     public decimal Valor { get; set; }
     public string CategoriaNome { get; set; } = string.Empty;
-    public ModulosCursoParcialViewModel ModulosCurso { get; set; } = new();
 }

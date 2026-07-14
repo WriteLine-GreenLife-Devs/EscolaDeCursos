@@ -18,40 +18,50 @@ public sealed class ConteudoCursoController(
         CadastrarModuloCursoViewModel viewModel)
     {
         if (!ModelState.IsValid)
-            return RedirecionarParaListaDeCursos(
+            return RedirecionarParaEdicaoDoCurso(
+                viewModel.CursoId,
                 "Verifique os dados informados no módulo.");
 
         Result resultado = servicoModuloCurso.Cadastrar(
             mapeador.Map<CadastrarModuloCursoDto>(viewModel));
 
         if (resultado.IsFailed)
-            return RedirecionarParaListaDeCursos(
+            return RedirecionarParaEdicaoDoCurso(
+                viewModel.CursoId,
                 resultado.Errors.First().Message);
 
         TempData["MensagemSucesso"] =
             "Módulo cadastrado com sucesso.";
 
-        return RedirecionarParaListaDeCursos();
+        return RedirecionarParaEdicaoDoCurso(viewModel.CursoId);
     }
 
     [HttpPost]
     public ActionResult Editar(EditarModuloCursoViewModel viewModel)
     {
+        ModuloCursoDto? modulo = servicoModuloCurso.SelecionarPorId(
+            viewModel.Id);
+
+        if (modulo == null)
+            return NotFound();
+
         if (!ModelState.IsValid)
-            return RedirecionarParaListaDeCursos(
+            return RedirecionarParaEdicaoDoCurso(
+                modulo.CursoId,
                 "Verifique os dados informados no módulo.");
 
         Result resultado = servicoModuloCurso.Editar(
             mapeador.Map<EditarModuloCursoDto>(viewModel));
 
         if (resultado.IsFailed)
-            return RedirecionarParaListaDeCursos(
+            return RedirecionarParaEdicaoDoCurso(
+                modulo.CursoId,
                 resultado.Errors.First().Message);
 
         TempData["MensagemSucesso"] =
             "Módulo atualizado com sucesso.";
 
-        return RedirecionarParaListaDeCursos();
+        return RedirecionarParaEdicaoDoCurso(modulo.CursoId);
     }
 
     [HttpPost]
@@ -92,15 +102,19 @@ public sealed class ConteudoCursoController(
                 : "Módulo desativado com sucesso.";
         }
 
-        return RedirecionarParaListaDeCursos();
+        return RedirecionarParaEdicaoDoCurso(modulo.CursoId);
     }
 
-    private ActionResult RedirecionarParaListaDeCursos(
+    private ActionResult RedirecionarParaEdicaoDoCurso(
+        Guid cursoId,
         string? mensagemErro = null)
     {
         if (!string.IsNullOrWhiteSpace(mensagemErro))
             TempData["MensagemErro"] = mensagemErro;
 
-        return RedirectToAction("ListarCursos", "ADM");
+        return RedirectToAction(
+            "EditarCurso",
+            "ADM",
+            new { id = cursoId });
     }
 }

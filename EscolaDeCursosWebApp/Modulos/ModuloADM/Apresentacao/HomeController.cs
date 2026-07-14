@@ -167,16 +167,7 @@ public class ADMController(
                 NivelDificuldade = curso.nivelDificuldade,
                 Status = curso.status,
                 Valor = curso.valor,
-                CategoriaNome = categorias.TryGetValue(curso.categoriaId, out var nomeCategoria) ? nomeCategoria : "-",
-                ModulosCurso = new ModulosCursoParcialViewModel
-                {
-                    CursoId = curso.Id,
-                    PermiteEdicao = true,
-                    Modulos = mapeador.Map<List<ModuloCursoViewModel>>(
-                        servicoModuloCurso.SelecionarPorCurso(
-                            curso.Id,
-                            incluirInativos: true))
-                }
+                CategoriaNome = categorias.TryGetValue(curso.categoriaId, out var nomeCategoria) ? nomeCategoria : "-"
             })
             .ToList();
 
@@ -247,6 +238,7 @@ public class ADMController(
             return NotFound();
 
         ViewBag.Categorias = repositorioCategoria.SelecionarTodos().OrderBy(c => c.nome).ToList();
+        ViewBag.ModulosCurso = CriarModulosCursoParaEdicao(id);
 
         var editarVm = new EditarCursoDto(
             curso.Id,
@@ -266,6 +258,7 @@ public class ADMController(
     public ActionResult EditarCurso(Guid id, EditarCursoDto editarVm)
     {
         ViewBag.Categorias = repositorioCategoria.SelecionarTodos().OrderBy(c => c.nome).ToList();
+        ViewBag.ModulosCurso = CriarModulosCursoParaEdicao(id);
 
         if (!ModelState.IsValid)
             return View("~/Modulos/ModuloADM/Apresentacao/Views/CursoADM/Editar.cshtml", editarVm);
@@ -279,6 +272,20 @@ public class ADMController(
         }
 
         return RedirectToAction("ListarCursos");
+    }
+
+    private ModulosCursoParcialViewModel CriarModulosCursoParaEdicao(
+        Guid cursoId)
+    {
+        return new ModulosCursoParcialViewModel
+        {
+            CursoId = cursoId,
+            PermiteEdicao = true,
+            Modulos = mapeador.Map<List<ModuloCursoViewModel>>(
+                servicoModuloCurso.SelecionarPorCurso(
+                    cursoId,
+                    incluirInativos: true))
+        };
     }
 
     [HttpGet]
