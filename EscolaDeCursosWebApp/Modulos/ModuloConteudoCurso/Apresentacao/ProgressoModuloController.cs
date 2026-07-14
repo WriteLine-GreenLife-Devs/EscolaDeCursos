@@ -23,10 +23,15 @@ public sealed class ProgressoModuloController(
             return Forbid();
 
         if (!ModelState.IsValid)
+        {
+            TempData["MensagemProgressoErro"] =
+                "Não foi possível atualizar o progresso.";
+
             return RedirectToAction(
                 "DetalhesMatricula",
                 "Aluno",
                 new { id = viewModel.MatriculaId });
+        }
 
         Result resultado = servicoProgresso.AtualizarConclusaoDoAluno(
             mapeador.Map<AtualizarConclusaoModuloAlunoDto>(viewModel),

@@ -39,7 +39,7 @@ else
                             <input type="hidden" name="ModuloCursoId"
                                    value="@modulo.ModuloCursoId" />
                             <input type="hidden" name="Concluido"
-                                   value="@(!modulo.Concluido).ToString().ToLowerInvariant()" />
+                                   value="@((!modulo.Concluido).ToString().ToLowerInvariant())" />
                             <button type="submit"
                                     class="btn @(modulo.Concluido ? "btn-outline-secondary" : "btn-outline-success") btn-sm">
                                 @(modulo.Concluido ? "Marcar como pendente" : "Marcar como concluído")
