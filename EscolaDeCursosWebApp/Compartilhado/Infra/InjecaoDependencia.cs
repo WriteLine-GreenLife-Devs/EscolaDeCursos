@@ -11,6 +11,8 @@ using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Infra;
 using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Infra;
+using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloAluno.Infra;
 using Microsoft.EntityFrameworkCore;
 
 namespace EscolaDeCursosWebApp.Compartilhado.Infra;
@@ -48,5 +50,8 @@ public static class InjecaoDependencia
         services.AddScoped<IRepositorioTurma, RepositorioTurma>();
         services.AddScoped<IRepositorioMatricula, RepositorioMatricula>();
         services.AddScoped<IRepositorioProfessor, RepositorioProfessor>();
+        services.AddScoped<IRepositorioAluno, RepositorioAluno>();
+        services.AddScoped<IRepositorioNotaAluno, RepositorioNotaAluno>();
+        services.AddScoped<IRepositorioPresencaAluno, RepositorioPresencaAluno>();
     }
 }
