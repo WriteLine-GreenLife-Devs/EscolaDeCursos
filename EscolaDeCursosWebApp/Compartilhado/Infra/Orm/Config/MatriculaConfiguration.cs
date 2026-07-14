@@ -54,5 +54,9 @@ public sealed class MatriculaConfiguration : IEntityTypeConfiguration<Matricula>
 
         builder.HasIndex(m => m.AlunoId)
             .HasDatabaseName("IX_TBMatricula_AlunoId");
+
+        builder.HasIndex(m => new { m.AlunoId, m.TurmaId })
+            .IsUnique()
+            .HasDatabaseName("UX_TBMatricula_AlunoId_TurmaId");
     }
 }

@@ -22,6 +22,7 @@ public class CadastrarUsuarioADMViewModel
     public string Email { get; set; } = string.Empty;
 
     [Required]
+    [RegularExpression(@"^\D*(?:\d\D*){10,11}$", ErrorMessage = "O telefone deve conter 10 ou 11 dígitos.")]
     public string Telefone { get; set; } = string.Empty;
 
     [Required]
@@ -63,12 +64,14 @@ public class EditarUsuarioADMViewModel
     public string Email { get; set; } = string.Empty;
 
     [Required]
+    [RegularExpression(@"^\D*(?:\d\D*){10,11}$", ErrorMessage = "O telefone deve conter 10 ou 11 dígitos.")]
     public string Telefone { get; set; } = string.Empty;
 
-    public string Senha { get; set; } = string.Empty;
+    [MinLength(6, ErrorMessage = "A senha deve conter no mínimo 6 caracteres.")]
+    public string? Senha { get; set; }
 
     [Compare("Senha", ErrorMessage = "As senhas não conferem.")]
-    public string ConfirmarSenha { get; set; } = string.Empty;
+    public string? ConfirmarSenha { get; set; }
 }
 
 public class ExcluirUsuarioADMViewModel
