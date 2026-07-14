@@ -33,6 +33,7 @@ public sealed class ModuloCurso : EntidadeBase<ModuloCurso>
         Descricao = entidadeAtualizada.Descricao?.Trim() ?? string.Empty;
         DuracaoMinutos = entidadeAtualizada.DuracaoMinutos;
         Ordem = entidadeAtualizada.Ordem;
+        Ativo = entidadeAtualizada.Ativo;
     }
 
     public void Desativar()
