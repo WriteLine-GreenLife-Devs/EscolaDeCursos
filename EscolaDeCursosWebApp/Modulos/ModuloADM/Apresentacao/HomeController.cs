@@ -16,6 +16,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
+using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 
@@ -920,7 +921,7 @@ public class ADMController(
 
         string senhaAtualizada = string.IsNullOrWhiteSpace(editarVm.Senha)
             ? usuario.senha
-            : editarVm.Senha;
+            : HashSenha.GerarHash(editarVm.Senha);
 
         var entidadeAtualizada = new Usuario(
             editarVm.Nome,
@@ -1137,7 +1138,7 @@ public class ADMController(
 
         string senhaAtualizada = string.IsNullOrWhiteSpace(editarVm.Senha)
             ? usuario.senha
-            : editarVm.Senha;
+            : HashSenha.GerarHash(editarVm.Senha);
 
         var entidadeAtualizada = new Usuario(
             editarVm.Nome,

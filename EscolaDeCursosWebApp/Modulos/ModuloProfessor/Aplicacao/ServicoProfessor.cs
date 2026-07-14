@@ -24,7 +24,7 @@ public sealed class ServicoProfessor
         var usuario = new Usuario(
             dto.Nome,
             dto.Email,
-            dto.Senha,
+            HashSenha.GerarHash(dto.Senha),
             dto.Telefone,
             TipoUsuario.Professor
         );

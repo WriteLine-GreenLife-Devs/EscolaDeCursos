@@ -56,7 +56,7 @@ public class ServicoUsuario : ServicoBase<Usuario>
         Usuario usuario = new Usuario(
             cadastrarUsuarioDto.nome,
             cadastrarUsuarioDto.email,
-            cadastrarUsuarioDto.senha,
+            HashSenha.GerarHash(cadastrarUsuarioDto.senha),
             cadastrarUsuarioDto.telefone,
             cadastrarUsuarioDto.tipoUsuario
         );
@@ -78,10 +78,17 @@ public class ServicoUsuario : ServicoBase<Usuario>
 
         var encontrados = repositorioUsuario.Filtrar(u =>
             u.ativo &&
-            string.Equals(u.email, email, StringComparison.OrdinalIgnoreCase) &&
-            u.senha == senha);
+            string.Equals(u.email, email, StringComparison.OrdinalIgnoreCase));
 
-        return encontrados.FirstOrDefault();
+        var usuario = encontrados.FirstOrDefault();
+
+        if (usuario == null)
+            return null;
+
+        if (!HashSenha.Verificar(senha, usuario.senha))
+            return null;
+
+        return usuario;
     }
 
     public bool DesativarUsuario(Guid usuarioId, TipoUsuario tipoUsuarioEsperado)
