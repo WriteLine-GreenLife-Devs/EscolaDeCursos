@@ -892,10 +892,39 @@ public class ADMController(
         if (usuario == null || usuario.tipoUsuario != TipoUsuario.Aluno)
             return NotFound();
 
+        string senhaAtualizada = string.IsNullOrWhiteSpace(editarVm.Senha)
+            ? usuario.senha
+            : editarVm.Senha;
+
+        var entidadeAtualizada = new Usuario(
+            editarVm.Nome,
+            editarVm.Email,
+            senhaAtualizada!,
+            editarVm.Telefone,
+            TipoUsuario.Aluno
+        )
+        {
+            ativo = usuario.ativo
+        };
+
+        List<string> errosValidacao = entidadeAtualizada.Validar();
+
+        if (errosValidacao.Count > 0)
+        {
+            foreach (string erro in errosValidacao)
+                ModelState.AddModelError(string.Empty, erro);
+
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/AlunoADM/Editar.cshtml", editarVm);
+        }
+
         bool emailDuplicado = repositorioUsuario.SelecionarTodos()
-            .Any(u => u.Id != id && string.Equals(u.email, editarVm.Email, StringComparison.OrdinalIgnoreCase));
+            .Any(u => u.Id != id && string.Equals(
+                u.email,
+                entidadeAtualizada.email,
+                StringComparison.OrdinalIgnoreCase));
         bool telefoneDuplicado = repositorioUsuario.SelecionarTodos()
-            .Any(u => u.Id != id && u.telefone == editarVm.Telefone);
+            .Any(u => u.Id != id &&
+                u.telefone == entidadeAtualizada.telefone);
 
         if (emailDuplicado)
             ModelState.AddModelError(nameof(editarVm.Email), "Já existe um usuário com esse email.");
@@ -905,21 +934,6 @@ public class ADMController(
 
         if (!ModelState.IsValid)
             return View("~/Modulos/ModuloADM/Apresentacao/Views/AlunoADM/Editar.cshtml", editarVm);
-
-        string senhaAtualizada = string.IsNullOrWhiteSpace(editarVm.Senha)
-            ? usuario.senha
-            : editarVm.Senha;
-
-        var entidadeAtualizada = new Usuario(
-            editarVm.Nome,
-            editarVm.Email,
-            senhaAtualizada,
-            editarVm.Telefone,
-            TipoUsuario.Aluno
-        )
-        {
-            ativo = usuario.ativo
-        };
 
         if (!repositorioUsuario.Editar(id, entidadeAtualizada))
         {
@@ -1095,10 +1109,39 @@ public class ADMController(
         if (usuario == null || usuario.tipoUsuario != TipoUsuario.Professor)
             return NotFound();
 
+        string senhaAtualizada = string.IsNullOrWhiteSpace(editarVm.Senha)
+            ? usuario.senha
+            : editarVm.Senha;
+
+        var entidadeAtualizada = new Usuario(
+            editarVm.Nome,
+            editarVm.Email,
+            senhaAtualizada!,
+            editarVm.Telefone,
+            TipoUsuario.Professor
+        )
+        {
+            ativo = usuario.ativo
+        };
+
+        List<string> errosValidacao = entidadeAtualizada.Validar();
+
+        if (errosValidacao.Count > 0)
+        {
+            foreach (string erro in errosValidacao)
+                ModelState.AddModelError(string.Empty, erro);
+
+            return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Editar.cshtml", editarVm);
+        }
+
         bool emailDuplicado = repositorioUsuario.SelecionarTodos()
-            .Any(u => u.Id != id && string.Equals(u.email, editarVm.Email, StringComparison.OrdinalIgnoreCase));
+            .Any(u => u.Id != id && string.Equals(
+                u.email,
+                entidadeAtualizada.email,
+                StringComparison.OrdinalIgnoreCase));
         bool telefoneDuplicado = repositorioUsuario.SelecionarTodos()
-            .Any(u => u.Id != id && u.telefone == editarVm.Telefone);
+            .Any(u => u.Id != id &&
+                u.telefone == entidadeAtualizada.telefone);
 
         if (emailDuplicado)
             ModelState.AddModelError(nameof(editarVm.Email), "Já existe um usuário com esse email.");
@@ -1108,21 +1151,6 @@ public class ADMController(
 
         if (!ModelState.IsValid)
             return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Editar.cshtml", editarVm);
-
-        string senhaAtualizada = string.IsNullOrWhiteSpace(editarVm.Senha)
-            ? usuario.senha
-            : editarVm.Senha;
-
-        var entidadeAtualizada = new Usuario(
-            editarVm.Nome,
-            editarVm.Email,
-            senhaAtualizada,
-            editarVm.Telefone,
-            TipoUsuario.Professor
-        )
-        {
-            ativo = usuario.ativo
-        };
 
         if (!repositorioUsuario.Editar(id, entidadeAtualizada))
         {
@@ -1166,4 +1194,3 @@ public class ADMController(
         return RedirectToAction("ListarProfessores");
     }
 }
-

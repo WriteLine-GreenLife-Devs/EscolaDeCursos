@@ -52,26 +52,24 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
         if (aluno == null || aluno.tipoUsuario != TipoUsuario.Aluno || !aluno.ativo)
             return Falha(nameof(dto.AlunoId), "Aluno não encontrado ou inválido.");
 
-        // contar ocupadas (apenas Cursando ocupam vaga)
-        var ocupadas = repositorioMatricula.Filtrar(m => m.TurmaId == dto.TurmaId && m.Situacao == SituacaoMatricula.Cursando).Count;
-        if (ocupadas >= turma.vagasMaximas)
-            return Falha(string.Empty, "Não há vagas disponíveis nesta turma.");
-
-        bool matriculaExistente = repositorioMatricula.Filtrar(m =>
-            m.TurmaId == dto.TurmaId &&
-            m.AlunoId == dto.AlunoId).Any();
-
-        if (matriculaExistente)
-            return Falha(string.Empty, "Aluno já está matriculado nesta turma.");
-
         var matricula = new Matricula(dto.AlunoId, dto.TurmaId, DateTime.Now, SituacaoMatricula.Cursando);
 
         var erros = matricula.Validar();
         if (erros.Count > 0)
             return Falha(string.Empty, erros.First());
 
-        repositorioMatricula.Cadastrar(matricula);
-        return Result.Ok();
+        ResultadoCadastroMatricula resultadoCadastro = repositorioMatricula
+            .CadastrarComControleDeVagas(matricula, turma.vagasMaximas);
+
+        return resultadoCadastro switch
+        {
+            ResultadoCadastroMatricula.Sucesso => Result.Ok(),
+            ResultadoCadastroMatricula.MatriculaExistente =>
+                Falha(string.Empty, "Aluno já está matriculado nesta turma."),
+            ResultadoCadastroMatricula.SemVagas =>
+                Falha(string.Empty, "Não há vagas disponíveis nesta turma."),
+            _ => Falha(string.Empty, "Não foi possível realizar a matrícula.")
+        };
     }
 
     public Result AlterarSituacaoMatricula(AlterarSituacaoMatriculaDto dto)
