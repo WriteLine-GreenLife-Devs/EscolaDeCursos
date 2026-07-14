@@ -12,6 +12,11 @@
 }
 
 <div class="container py-5">
+    @if (TempData["MensagemCatalogoSucesso"] is string mensagemSucesso)
+    {
+        <div class="alert alert-success">@mensagemSucesso</div>
+    }
+
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
             <p class="text-secondary text-uppercase small fw-semibold mb-1">
@@ -32,6 +37,10 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2">
+            <a asp-action="Catalogo" class="btn btn-primary">
+                Catálogo de cursos
+            </a>
+
             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                     data-bs-target="#modalPerfilAluno">
                 Meu perfil
@@ -77,9 +86,6 @@
     <div class="d-flex justify-content-between align-items-end gap-3 mb-3">
         <div>
             <h2 class="h4 mb-1">Minhas turmas</h2>
-            <p class="text-secondary mb-0">
-                Cada turma reúne o curso, professor e seu progresso atual.
-            </p>
         </div>
     </div>
 
@@ -142,7 +148,7 @@
 
                             <div class="mb-4">
                                 <div class="d-flex justify-content-between small mb-1">
-                                    <span>Progresso da turma</span>
+                                    <span>Progresso por tempo</span>
                                     <span>@matricula.ProgressoCronologicoPercentual%</span>
                                 </div>
 
@@ -153,9 +159,6 @@
                                     </div>
                                 </div>
 
-                                <p class="text-secondary small mb-0 mt-2">
-                                    Baseado no período da turma. O progresso por conteúdo será fornecido pelo curso.
-                                </p>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center gap-2 mt-auto">
@@ -188,12 +191,11 @@
                             <div class="modal-body">
                                 <dl class="row g-2 mb-3">
                                     <dt class="col-4">Email</dt>
-                                    <dd class="col-8 text-break">@(string.IsNullOrWhiteSpace(matricula.Professor.Email) ? "-" :
-                                                                        matricula.Professor.Email)</dd>
+                                    <dd class="col-8 text-break">@(string.IsNullOrWhiteSpace(matricula.Professor.Email) ? "-" : matricula.Professor.Email)</dd>
 
-                                        <dt class="col-4">Especialidades</dt>
-                                        <dd class="col-8">@(string.IsNullOrWhiteSpace(matricula.Professor.Especialidades) ? "Não informado" : matricula.Professor.Especialidades)</dd>
-                                    </dl>
+                                    <dt class="col-4">Especialidades</dt>
+                                    <dd class="col-8">@(string.IsNullOrWhiteSpace(matricula.Professor.Especialidades) ? "Não informado" : matricula.Professor.Especialidades)</dd>
+                                </dl>
 
                                     <h3 class="h6">Biografia profissional</h3>
                                     <p class="mb-0">

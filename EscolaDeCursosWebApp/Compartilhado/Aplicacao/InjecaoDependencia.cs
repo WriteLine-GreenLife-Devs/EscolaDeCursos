@@ -29,6 +29,7 @@ public static class InjecaoDependencia
         services.AddScoped<ServicoMatricula>();
         services.AddScoped<ServicoProfessor>();
         services.AddScoped<ServicoAluno>();
+        services.AddScoped<ServicoCatalogoAluno>();
         services.AddScoped<ServicoNotaAluno>();
         services.AddScoped<ServicoPresencaAluno>();
     }

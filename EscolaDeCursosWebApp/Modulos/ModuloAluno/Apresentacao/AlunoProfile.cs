@@ -14,6 +14,8 @@ public sealed class AlunoProfile : Profile
         CreateMap<CursoResumoAlunoDto, CursoResumoAlunoViewModel>();
         CreateMap<ProfessorResumoAlunoDto, ProfessorResumoAlunoViewModel>();
         CreateMap<MatriculaPainelAlunoDto, MatriculaPainelAlunoViewModel>();
+        CreateMap<TurmaCatalogoAlunoDto, TurmaCatalogoAlunoViewModel>();
+        CreateMap<CursoCatalogoAlunoDto, CursoCatalogoAlunoViewModel>();
         CreateMap<NotaAlunoDto, NotaAlunoViewModel>();
         CreateMap<PresencaAlunoDto, PresencaAlunoViewModel>();
     }

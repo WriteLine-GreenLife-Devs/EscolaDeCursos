@@ -1,0 +1,152 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloAluno.Apresentacao.CatalogoAlunoViewModel
+
+@{
+    Layout = "_LayoutPaginaInicial";
+    ViewBag.Titulo = "Catálogo de Cursos";
+}
+
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <p class="text-secondary text-uppercase small fw-semibold mb-1">
+                Catálogo
+            </p>
+
+            <h1 class="h3 mb-1">Cursos disponíveis</h1>
+            <p class="text-secondary mb-0">
+                Consulte valores, turmas e disponibilidade antes de se inscrever.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Voltar para minha área
+        </a>
+    </div>
+
+    @if (TempData["MensagemCatalogoErro"] is string mensagemErro)
+    {
+        <div class="alert alert-danger">@mensagemErro</div>
+    }
+
+    @if (TempData["MensagemCatalogoSucesso"] is string mensagemSucesso)
+    {
+        <div class="alert alert-success">@mensagemSucesso</div>
+    }
+
+    @if (Model.Cursos.Count == 0)
+    {
+        <div class="alert alert-info">
+            Nenhum curso ativo está disponível no catálogo.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var curso in Model.Cursos)
+            {
+                <div class="col-12">
+                    <article class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                <div class="col-lg-4">
+                                    <span class="badge text-bg-light mb-2">
+                                        @curso.CategoriaNome
+                                    </span>
+
+                                    <h2 class="h4">@curso.Nome</h2>
+                                    <p class="text-secondary">@curso.Descricao</p>
+
+                                    <dl class="row g-2 mb-0">
+                                        <dt class="col-6 text-secondary">Nível</dt>
+                                        <dd class="col-6">@curso.NivelDificuldade</dd>
+
+                                        <dt class="col-6 text-secondary">Carga horária</dt>
+                                        <dd class="col-6">@curso.CargaHoraria horas</dd>
+
+                                        <dt class="col-6 text-secondary">Valor</dt>
+                                        <dd class="col-6 fw-semibold">
+                                            @curso.Valor.ToString("C")
+                                        </dd>
+                                    </dl>
+
+                                </div>
+
+                                <div class="col-lg-8">
+                                    <h3 class="h5 mb-3">Turmas</h3>
+
+                                    @if (curso.Turmas.Count == 0)
+                                    {
+                                        <div class="alert alert-secondary mb-0">
+                                            Este curso ainda não possui turmas cadastradas.
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-grid gap-3">
+                                            @foreach (var turma in curso.Turmas)
+                                            {
+                                                <div class="border rounded-3 p-3">
+                                                    <div class="d-flex flex-wrap justify-content-between gap-3">
+                                                        <div>
+                                                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                                                <h4 class="h6 mb-0">@turma.Nome</h4>
+                                                                <span class="badge text-bg-light">@turma.Status</span>
+                                                            </div>
+
+                                                            <p class="small text-secondary mb-1">
+                                                                @turma.DataInicio.ToString("dd/MM/yyyy") a
+                                                                @turma.DataFim.ToString("dd/MM/yyyy")
+                                                            </p>
+                                                            <p class="small text-secondary mb-1">
+                                                                @turma.HorarioTurno
+                                                            </p>
+                                                            <p class="small text-secondary mb-0">
+                                                                Professor: @turma.ProfessorNome
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="text-lg-end">
+                                                            <p class="small mb-2">
+                                                                <strong>@turma.VagasDisponiveis</strong>
+                                                                vaga(s) disponível(is)
+                                                            </p>
+
+                                                            @if (turma.AlunoMatriculado)
+                                                            {
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                                                    Inscrito
+                                                                </button>
+                                                            }
+                                                            else if (turma.InscricaoDisponivel)
+                                                            {
+                                                                <form asp-action="IngressarNaTurma" method="post">
+                                                                    <input type="hidden" name="turmaId" value="@turma.Id" />
+                                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                                        Inscrever
+                                                                    </button>
+                                                                </form>
+                                                            }
+                                                            else
+                                                            {
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                                                    Inscrição indisponível
+                                                                </button>
+                                                                <small class="d-block text-secondary mt-2">
+                                                                    @turma.MotivoIndisponibilidade
+                                                                </small>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+</div>

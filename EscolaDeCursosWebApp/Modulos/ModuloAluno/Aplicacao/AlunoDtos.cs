@@ -63,6 +63,31 @@ public record MatriculaPainelAlunoDto(
     double? NotaFinal
 );
 
+public record TurmaCatalogoAlunoDto(
+    Guid Id,
+    string Nome,
+    DateTime DataInicio,
+    DateTime DataFim,
+    string HorarioTurno,
+    StatusTurma Status,
+    string ProfessorNome,
+    int VagasDisponiveis,
+    bool AlunoMatriculado,
+    bool InscricaoDisponivel,
+    string MotivoIndisponibilidade
+);
+
+public record CursoCatalogoAlunoDto(
+    Guid Id,
+    string Nome,
+    string Descricao,
+    int CargaHoraria,
+    NivelDificuldade NivelDificuldade,
+    decimal Valor,
+    string CategoriaNome,
+    List<TurmaCatalogoAlunoDto> Turmas
+);
+
 public record CadastrarNotaAlunoDto(
     Guid MatriculaId,
     TipoNotaAluno TipoNota,

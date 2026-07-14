@@ -1,4 +1,5 @@
 using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
@@ -10,15 +11,18 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
 {
     private readonly IRepositorioMatricula repositorioMatricula;
     private readonly IRepositorioTurma repositorioTurma;
+    private readonly IRepositorioCurso repositorioCurso;
     private readonly IRepositorioUsuario repositorioUsuario;
 
     public ServicoMatricula(
         IRepositorioMatricula repositorioMatricula,
         IRepositorioTurma repositorioTurma,
+        IRepositorioCurso repositorioCurso,
         IRepositorioUsuario repositorioUsuario)
     {
         this.repositorioMatricula = repositorioMatricula;
         this.repositorioTurma = repositorioTurma;
+        this.repositorioCurso = repositorioCurso;
         this.repositorioUsuario = repositorioUsuario;
     }
 
@@ -33,6 +37,17 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
         if (turma == null)
             return Falha(nameof(dto.TurmaId), "Turma não encontrada.");
 
+        Curso? curso = repositorioCurso.SelecionarPorId(turma.cursoId);
+
+        if (curso == null || curso.status != StatusCurso.Ativo)
+            return Falha(nameof(dto.TurmaId), "O curso não está disponível para matrícula.");
+
+        if (turma.status != StatusTurma.InscricoesAbertas ||
+            turma.dataFim.Date < DateTime.Today)
+        {
+            return Falha(nameof(dto.TurmaId), "As inscrições desta turma não estão abertas.");
+        }
+
         var aluno = repositorioUsuario.SelecionarPorId(dto.AlunoId);
         if (aluno == null || aluno.tipoUsuario != TipoUsuario.Aluno || !aluno.ativo)
             return Falha(nameof(dto.AlunoId), "Aluno não encontrado ou inválido.");
@@ -42,9 +57,11 @@ public sealed class ServicoMatricula : ServicoBase<Matricula>
         if (ocupadas >= turma.vagasMaximas)
             return Falha(string.Empty, "Não há vagas disponíveis nesta turma.");
 
-        // evitar matricular o mesmo aluno duas vezes como Cursando
-        var existenteAtiva = repositorioMatricula.Filtrar(m => m.TurmaId == dto.TurmaId && m.AlunoId == dto.AlunoId && m.Situacao == SituacaoMatricula.Cursando).Any();
-        if (existenteAtiva)
+        bool matriculaExistente = repositorioMatricula.Filtrar(m =>
+            m.TurmaId == dto.TurmaId &&
+            m.AlunoId == dto.AlunoId).Any();
+
+        if (matriculaExistente)
             return Falha(string.Empty, "Aluno já está matriculado nesta turma.");
 
         var matricula = new Matricula(dto.AlunoId, dto.TurmaId, DateTime.Now, SituacaoMatricula.Cursando);

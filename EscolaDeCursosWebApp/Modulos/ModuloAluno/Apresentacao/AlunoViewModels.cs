@@ -38,6 +38,31 @@ public record ProfessorResumoAlunoViewModel(
     string Especialidades
 );
 
+public record TurmaCatalogoAlunoViewModel(
+    Guid Id,
+    string Nome,
+    DateTime DataInicio,
+    DateTime DataFim,
+    string HorarioTurno,
+    StatusTurma Status,
+    string ProfessorNome,
+    int VagasDisponiveis,
+    bool AlunoMatriculado,
+    bool InscricaoDisponivel,
+    string MotivoIndisponibilidade
+);
+
+public record CursoCatalogoAlunoViewModel(
+    Guid Id,
+    string Nome,
+    string Descricao,
+    int CargaHoraria,
+    NivelDificuldade NivelDificuldade,
+    decimal Valor,
+    string CategoriaNome,
+    List<TurmaCatalogoAlunoViewModel> Turmas
+);
+
 public sealed record MatriculaPainelAlunoViewModel(
     Guid Id,
     TurmaResumoAlunoViewModel Turma,
@@ -88,6 +113,11 @@ public sealed class PainelAlunoViewModel
 {
     public DetalhesAlunoViewModel Aluno { get; init; } = null!;
     public List<MatriculaPainelAlunoViewModel> Matriculas { get; init; } = [];
+}
+
+public sealed class CatalogoAlunoViewModel
+{
+    public List<CursoCatalogoAlunoViewModel> Cursos { get; init; } = [];
 }
 
 public sealed class DetalhesMatriculaAlunoViewModel
