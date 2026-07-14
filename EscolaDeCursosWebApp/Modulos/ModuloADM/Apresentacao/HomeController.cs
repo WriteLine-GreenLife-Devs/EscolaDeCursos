@@ -4,6 +4,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
@@ -19,6 +20,7 @@ namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 public class ADMController(
     ServicoUsuario servicoUsuario,
     ServicoProfessor servicoProfessor,
+    ServicoAluno servicoAluno,
     IRepositorioUsuario repositorioUsuario,
     ServicoCategoria servicoCategoria,
     IRepositorioCategoria repositorioCategoria,
@@ -635,15 +637,14 @@ public class ADMController(
         if (!ModelState.IsValid)
             return View("~/Modulos/ModuloADM/Apresentacao/Views/AlunoADM/Cadastrar.cshtml", cadastrarVm);
 
-        var dto = new CadastrarUsuarioDto(
+        var dto = new CadastrarAlunoDto(
             cadastrarVm.Nome,
             cadastrarVm.Email,
             cadastrarVm.Senha,
-            cadastrarVm.Telefone,
-            TipoUsuario.Aluno
+            cadastrarVm.Telefone
         );
 
-        var resultado = servicoUsuario.CadastrarUsuario(dto);
+        var resultado = servicoAluno.Cadastrar(dto);
 
         if (resultado.IsFailed)
         {

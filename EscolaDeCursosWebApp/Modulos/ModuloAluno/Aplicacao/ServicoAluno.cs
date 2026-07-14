@@ -1,5 +1,8 @@
 using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using FluentResults;
 
@@ -8,13 +11,22 @@ namespace EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 public sealed class ServicoAluno : ServicoBase<Aluno>
 {
     private readonly IRepositorioAluno repositorioAluno;
+    private readonly IRepositorioMatricula repositorioMatricula;
+    private readonly IRepositorioTurma repositorioTurma;
+    private readonly IRepositorioCurso repositorioCurso;
     private readonly IRepositorioUsuario repositorioUsuario;
 
     public ServicoAluno(
         IRepositorioAluno repositorioAluno,
+        IRepositorioMatricula repositorioMatricula,
+        IRepositorioTurma repositorioTurma,
+        IRepositorioCurso repositorioCurso,
         IRepositorioUsuario repositorioUsuario)
     {
         this.repositorioAluno = repositorioAluno;
+        this.repositorioMatricula = repositorioMatricula;
+        this.repositorioTurma = repositorioTurma;
+        this.repositorioCurso = repositorioCurso;
         this.repositorioUsuario = repositorioUsuario;
     }
 
@@ -88,6 +100,31 @@ public sealed class ServicoAluno : ServicoBase<Aluno>
             : MapearParaDetalhes(usuario);
     }
 
+    public List<MatriculaPainelAlunoDto> SelecionarMatriculas(Guid alunoId)
+    {
+        if (repositorioAluno.SelecionarPorId(alunoId) == null)
+            return [];
+
+        return repositorioMatricula.Filtrar(matricula =>
+                matricula.AlunoId == alunoId)
+            .Select(MapearMatricula)
+            .Where(matricula => matricula != null)
+            .Cast<MatriculaPainelAlunoDto>()
+            .ToList();
+    }
+
+    public MatriculaPainelAlunoDto? SelecionarMatricula(
+        Guid alunoId,
+        Guid matriculaId)
+    {
+        Matricula? matricula = repositorioMatricula.SelecionarPorId(matriculaId);
+
+        if (matricula == null || matricula.AlunoId != alunoId)
+            return null;
+
+        return MapearMatricula(matricula);
+    }
+
     private static ListarAlunosDto MapearParaListagem(Usuario usuario)
     {
         return new ListarAlunosDto(
@@ -107,6 +144,25 @@ public sealed class ServicoAluno : ServicoBase<Aluno>
             usuario.email,
             usuario.telefone,
             usuario.ativo
+        );
+    }
+
+    private MatriculaPainelAlunoDto? MapearMatricula(Matricula matricula)
+    {
+        Turma? turma = repositorioTurma.SelecionarPorId(matricula.TurmaId);
+
+        if (turma == null)
+            return null;
+
+        Curso? curso = repositorioCurso.SelecionarPorId(turma.cursoId);
+
+        return new MatriculaPainelAlunoDto(
+            matricula.Id,
+            turma.Id,
+            turma.nome,
+            curso?.nome ?? string.Empty,
+            matricula.DataMatricula,
+            matricula.Situacao
         );
     }
 

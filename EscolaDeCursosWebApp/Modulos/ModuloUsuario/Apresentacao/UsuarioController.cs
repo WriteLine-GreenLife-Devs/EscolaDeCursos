@@ -2,6 +2,7 @@ using AutoMapper;
 using EscolaDeCursosWebApp.Compartilhado.Apresentacao.Extensions;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -11,7 +12,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 namespace EscolaDeCursosWebApp.Modulos.ModuloUsuario.Apresentacao;
 
 [Route("ModuloUsuario/Apresentacao/[action]")]
-public class UsuarioController(ServicoUsuario servicoUsuario, IMapper mapeador) : Controller
+public class UsuarioController(
+    ServicoUsuario servicoUsuario,
+    ServicoAluno servicoAluno,
+    IMapper mapeador
+) : Controller
 {
     [HttpGet]
     public ActionResult CadastrarAluno()
@@ -35,10 +40,9 @@ public class UsuarioController(ServicoUsuario servicoUsuario, IMapper mapeador) 
         if (!ModelState.IsValid)
             return View(cadastrarVm);
 
-        cadastrarVm.TipoUsuario = TipoUsuario.Aluno;
-        CadastrarUsuarioDto dto = mapeador.Map<CadastrarUsuarioDto>(cadastrarVm);
+        CadastrarAlunoDto dto = mapeador.Map<CadastrarAlunoDto>(cadastrarVm);
 
-        Result resultado = servicoUsuario.CadastrarUsuario(dto);
+        Result resultado = servicoAluno.Cadastrar(dto);
 
         if (resultado.IsFailed)
         {
@@ -89,7 +93,7 @@ public class UsuarioController(ServicoUsuario servicoUsuario, IMapper mapeador) 
                 Redirect("/ModuloProfessor/Apresentacao/Index"),
 
             TipoUsuario.Aluno =>
-                RedirectToAction("Index", "Home"),
+                Redirect("/ModuloAluno/Apresentacao/Index"),
 
             _ =>
                 RedirectToAction("Index", "Home")
