@@ -63,7 +63,7 @@ public class ServicoUsuario : ServicoBase<Usuario>
 
         Result resultadoValidacao = ValidarEntidade(usuario);
 
-        if(resultadoValidacao.IsFailed)
+        if (resultadoValidacao.IsFailed)
             return resultadoValidacao;
 
         repositorioUsuario.Cadastrar(usuario);
@@ -73,7 +73,7 @@ public class ServicoUsuario : ServicoBase<Usuario>
 
     public Usuario? AutenticarUsuario(string email, string senha)
     {
-        if(string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
             return null;
 
         var encontrados = repositorioUsuario.Filtrar(u =>
@@ -84,12 +84,17 @@ public class ServicoUsuario : ServicoBase<Usuario>
         return encontrados.FirstOrDefault();
     }
 
-    public bool DesativarUsuario(Guid id)
+    public bool DesativarUsuario(Guid usuarioId, TipoUsuario tipoUsuarioEsperado)
     {
-        Usuario? usuario = repositorioUsuario.SelecionarPorId(id);
+        Usuario? usuario =
+            repositorioUsuario.SelecionarPorId(usuarioId);
 
-        if (usuario == null || !usuario.ativo)
+        if (usuario == null ||
+            !usuario.ativo ||
+            usuario.tipoUsuario != tipoUsuarioEsperado)
+        {
             return false;
+        }
 
         var usuarioDesativado = new Usuario(
             usuario.nome,
@@ -102,6 +107,14 @@ public class ServicoUsuario : ServicoBase<Usuario>
             ativo = false
         };
 
-        return repositorioUsuario.Editar(id, usuarioDesativado);
+        return repositorioUsuario.Editar(usuarioId, usuarioDesativado);
+    }
+
+    public bool VerificarUsuarioAtivo(Guid usuarioId)
+    {
+        Usuario? usuario =
+            repositorioUsuario.SelecionarPorId(usuarioId);
+
+        return usuario != null && usuario.ativo;
     }
 }

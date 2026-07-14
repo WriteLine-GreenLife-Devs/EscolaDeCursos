@@ -749,7 +749,7 @@ public class ADMController(
         if (!confirmado)
             return RedirectToAction("ListarAlunos");
 
-        if (!servicoUsuario.DesativarUsuario(id))
+        if (!servicoUsuario.DesativarUsuario(id, TipoUsuario.Aluno))
             TempData["MensagemErro"] = "Falha ao desativar o aluno.";
 
         return RedirectToAction("ListarAlunos");
@@ -952,7 +952,9 @@ public class ADMController(
         if (!confirmado)
             return RedirectToAction("ListarProfessores");
 
-        if (!servicoUsuario.DesativarUsuario(id))
+        if (!servicoUsuario.DesativarUsuario(
+            id,
+            TipoUsuario.Professor))
             TempData["MensagemErro"] = "Falha ao desativar o professor.";
 
         return RedirectToAction("ListarProfessores");
