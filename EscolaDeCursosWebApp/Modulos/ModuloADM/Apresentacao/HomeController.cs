@@ -3,6 +3,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
@@ -17,6 +18,7 @@ namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 [Route("ModuloADM/Apresentacao/[action]")]
 public class ADMController(
     ServicoUsuario servicoUsuario,
+    ServicoProfessor servicoProfessor,
     IRepositorioUsuario repositorioUsuario,
     ServicoCategoria servicoCategoria,
     IRepositorioCategoria repositorioCategoria,
@@ -748,18 +750,61 @@ public class ADMController(
     [HttpGet]
     public ActionResult ListarProfessores()
     {
-        var usuarios = repositorioUsuario.SelecionarTodos()
+        var professores = repositorioUsuario.SelecionarTodos()
             .Where(u => u.tipoUsuario == TipoUsuario.Professor)
-            .Select(u => new UsuarioADMViewModel
+            .Select(usuario =>
             {
-                Id = u.Id,
-                Nome = u.nome,
-                Email = u.email,
-                Telefone = u.telefone
+                var dados = servicoProfessor.SelecionarDadosParaPerfil(usuario.Id);
+
+                return new ProfessorADMPerfilViewModel
+                {
+                    Id = usuario.Id,
+                    Nome = usuario.nome,
+                    Email = usuario.email,
+                    Telefone = usuario.telefone,
+                    Bio = dados?.Bio ?? string.Empty,
+                    Especialidades = dados?.Especialidades ?? string.Empty,
+                    DataContratacao = dados?.DataContratacao ?? DateTime.Today,
+                    PerfilCadastrado = servicoProfessor.SelecionarPorId(usuario.Id) != null
+                };
             })
             .ToList();
 
-        return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Listar.cshtml", usuarios);
+        return View("~/Modulos/ModuloADM/Apresentacao/Views/ProfessorADM/Listar.cshtml", professores);
+    }
+
+    [HttpPost]
+    public ActionResult SalvarPerfilProfessor(
+        Guid id,
+        string bio,
+        string especialidades,
+        DateTime dataContratacao)
+    {
+        var usuario = repositorioUsuario.SelecionarPorId(id);
+
+        if (usuario == null || usuario.tipoUsuario != TipoUsuario.Professor)
+            return NotFound();
+
+        var resultado = servicoProfessor.SelecionarPorId(id) == null
+            ? servicoProfessor.Cadastrar(new CadastrarProfessorPerfilDto(
+                id,
+                bio,
+                especialidades,
+                dataContratacao))
+            : servicoProfessor.Editar(new EditarProfessorPerfilDto(
+                id,
+                bio,
+                especialidades,
+                dataContratacao));
+
+        if (resultado.IsFailed)
+        {
+            TempData["MensagemPerfilErro"] = resultado.Errors.First().Message;
+            return RedirectToAction(nameof(ListarProfessores), new { abrirPerfil = id });
+        }
+
+        TempData["MensagemPerfilSucesso"] = "Perfil profissional atualizado.";
+        return RedirectToAction(nameof(ListarProfessores), new { abrirPerfil = id });
     }
 
     [HttpGet]

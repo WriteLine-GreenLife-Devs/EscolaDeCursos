@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
+using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +12,8 @@ namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
 [Route("ModuloProfessor/Apresentacao/[action]")]
 public sealed class ProfessorController(
     ServicoTurma servicoTurma,
-    ServicoMatricula servicoMatricula
+    ServicoMatricula servicoMatricula,
+    ServicoProfessor servicoProfessor
 ) : Controller
 {
     [HttpGet]
@@ -32,13 +35,72 @@ public sealed class ProfessorController(
                 turma.TotalAlunos))
             .ToList();
 
+        DetalhesProfessorDto? perfilDto =
+            servicoProfessor.SelecionarDadosParaPerfil(professorId);
+
+        DetalhesProfessorViewModel? perfil = perfilDto == null
+            ? null
+            : new DetalhesProfessorViewModel(
+                perfilDto.Id,
+                perfilDto.Nome,
+                perfilDto.Email,
+                perfilDto.Telefone,
+                perfilDto.Bio,
+                perfilDto.Especialidades,
+                perfilDto.DataContratacao);
+
         var viewModel = new PainelProfessorViewModel
         {
             NomeProfessor = User.Identity?.Name ?? "Professor",
+            Perfil = perfil,
+            PerfilCadastrado = servicoProfessor.SelecionarPorId(professorId) != null,
             Turmas = turmas
         };
 
         return View(viewModel);
+    }
+
+    [HttpPost]
+    public ActionResult SalvarPerfil(EditarProfessorPerfilViewModel viewModel)
+    {
+        if (!TentarObterProfessorId(out Guid professorId))
+            return Forbid();
+
+        if (!ModelState.IsValid)
+        {
+            TempData["MensagemPerfilErro"] = "Verifique os dados informados.";
+            return RedirectToAction(nameof(Index), new { abrirPerfil = true });
+        }
+
+        Result resultado;
+
+        if (servicoProfessor.SelecionarPorId(professorId) == null)
+        {
+            resultado = servicoProfessor.Cadastrar(
+                new CadastrarProfessorPerfilDto(
+                    professorId,
+                    viewModel.Bio,
+                    viewModel.Especialidades,
+                    viewModel.DataContratacao));
+        }
+        else
+        {
+            resultado = servicoProfessor.Editar(
+                new EditarProfessorPerfilDto(
+                    professorId,
+                    viewModel.Bio,
+                    viewModel.Especialidades,
+                    viewModel.DataContratacao));
+        }
+
+        if (resultado.IsFailed)
+        {
+            TempData["MensagemPerfilErro"] = resultado.Errors.First().Message;
+            return RedirectToAction(nameof(Index), new { abrirPerfil = true });
+        }
+
+        TempData["MensagemPerfilSucesso"] = "Perfil atualizado com sucesso.";
+        return RedirectToAction(nameof(Index), new { abrirPerfil = true });
     }
 
     [HttpGet]

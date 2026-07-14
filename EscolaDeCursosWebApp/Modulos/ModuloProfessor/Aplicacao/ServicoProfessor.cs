@@ -160,6 +160,26 @@ public sealed class ServicoProfessor
         return MapearParaDetalhes(perfil, usuario);
     }
 
+    public DetalhesProfessorDto? SelecionarDadosParaPerfil(Guid usuarioId)
+    {
+        Usuario? usuario = repositorioUsuario.SelecionarPorId(usuarioId);
+
+        if (usuario == null || usuario.tipoUsuario != TipoUsuario.Professor)
+            return null;
+
+        Professor? professor = repositorioProfessor.SelecionarPorId(usuarioId);
+
+        return new DetalhesProfessorDto(
+            usuario.Id,
+            usuario.nome,
+            usuario.email,
+            usuario.telefone,
+            professor?.Bio ?? string.Empty,
+            professor?.Especialidades ?? string.Empty,
+            professor?.DataContratacao ?? DateTime.Today
+        );
+    }
+
     private static ListarProfessoresDto MapearParaListagem(
         Professor perfil,
         Usuario usuario)

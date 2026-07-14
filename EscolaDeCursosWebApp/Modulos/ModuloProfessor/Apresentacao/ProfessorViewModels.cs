@@ -70,6 +70,8 @@ public record DetalhesProfessorViewModel(
 public sealed class PainelProfessorViewModel
 {
     public string NomeProfessor { get; init; } = string.Empty;
+    public DetalhesProfessorViewModel? Perfil { get; init; }
+    public bool PerfilCadastrado { get; init; }
     public List<TurmaProfessorViewModel> Turmas { get; init; } = [];
 }
 

@@ -11,15 +11,30 @@
             <h1 class="h3 mb-1">Minhas turmas</h1>
 
             <p class="text-secondary mb-0">
-                Bem-vindo, @Model.NomeProfessor.
+                Bem-vindo,
+                <button type="button"
+                        class="btn btn-link text-secondary p-0 align-baseline"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalPerfilProfessor">
+                    @Model.NomeProfessor
+                </button>.
             </p>
         </div>
 
-        <form action="/ModuloUsuario/Apresentacao/Logout" method="post">
-            <button type="submit" class="btn btn-outline-danger">
-                Sair
+        <div class="d-flex gap-2">
+            <button type="button"
+                    class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalPerfilProfessor">
+                Meu perfil
             </button>
-        </form>
+
+            <form action="/ModuloUsuario/Apresentacao/Logout" method="post">
+                <button type="submit" class="btn btn-outline-danger">
+                    Sair
+                </button>
+            </form>
+        </div>
     </div>
 
     @if (Model.Turmas.Count == 0)
@@ -78,3 +93,142 @@
         </div>
     }
 </div>
+
+<div class="modal fade"
+     id="modalPerfilProfessor"
+     tabindex="-1"
+     aria-labelledby="tituloModalPerfilProfessor"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title fs-5" id="tituloModalPerfilProfessor">
+                        Perfil do professor
+                    </h2>
+                    <p class="text-secondary small mb-0">
+                        Dados da conta e informações profissionais.
+                    </p>
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Fechar">
+                </button>
+            </div>
+
+            <form asp-action="SalvarPerfil" method="post">
+                <div class="modal-body">
+                    <input type="hidden"
+                           name="Id"
+                           value="@(Model.Perfil?.Id ?? Guid.Empty)" />
+
+                    @if (TempData["MensagemPerfilErro"] is string mensagemErro)
+                    {
+                        <div class="alert alert-danger">@mensagemErro</div>
+                    }
+
+                    @if (TempData["MensagemPerfilSucesso"] is string mensagemSucesso)
+                    {
+                        <div class="alert alert-success">@mensagemSucesso</div>
+                    }
+
+                    @if (!Model.PerfilCadastrado)
+                    {
+                        <div class="alert alert-info">
+                            Complete as informações profissionais do seu perfil.
+                        </div>
+                    }
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome</label>
+                            <input class="form-control"
+                                   value="@Model.NomeProfessor"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input class="form-control"
+                                   value="@(Model.Perfil?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Telefone</label>
+                            <input class="form-control"
+                                   value="@(Model.Perfil?.Telefone ?? "-")"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="DataContratacao" class="form-label">
+                                Data de contratação
+                            </label>
+                            <input id="DataContratacao"
+                                   name="DataContratacao"
+                                   type="date"
+                                   class="form-control"
+                                   value="@(Model.Perfil?.DataContratacao.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))"
+                                   required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Especialidades" class="form-label">
+                            Especialidades
+                        </label>
+                        <input id="Especialidades"
+                               name="Especialidades"
+                               class="form-control"
+                               maxlength="500"
+                               value="@Model.Perfil?.Especialidades"
+                               placeholder="Ex.: C#, ASP.NET Core e SQL Server"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Bio" class="form-label">
+                            Biografia profissional
+                        </label>
+                        <textarea id="Bio"
+                                  name="Bio"
+                                  class="form-control"
+                                  rows="5"
+                                  maxlength="1000"
+                                  required>@Model.Perfil?.Bio</textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Fechar
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+                        Salvar perfil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Context.Request.Query["abrirPerfil"] == "true")
+{
+    @section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modalElement = document.getElementById('modalPerfilProfessor');
+
+                if (modalElement) {
+                    bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                }
+            });
+        </script>
+    }
+}

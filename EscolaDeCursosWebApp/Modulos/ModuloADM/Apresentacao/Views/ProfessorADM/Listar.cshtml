@@ -3,7 +3,7 @@
     ViewBag.Titulo = "Professores";
 }
 
-@model List<EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.UsuarioADMViewModel>;
+@model List<EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.ProfessorADMPerfilViewModel>;
 
 <div class="d-flex flex-wrap gap-2 mb-4">
     <a class="btn btn-outline-primary rounded-pill px-4" asp-action="CadastrarProfessor">Cadastrar Novo Professor</a>
@@ -21,6 +21,16 @@
     </div>
 }
 
+@if (TempData["MensagemPerfilErro"] is string mensagemPerfilErro)
+{
+    <div class="alert alert-danger">@mensagemPerfilErro</div>
+}
+
+@if (TempData["MensagemPerfilSucesso"] is string mensagemPerfilSucesso)
+{
+    <div class="alert alert-success">@mensagemPerfilSucesso</div>
+}
+
 @if (Model.Count == 0)
 {
     <div class="alert alert-primary border-start border-primary border-4 rounded-3" role="alert">
@@ -32,11 +42,17 @@ else
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
         @foreach (var professor in Model)
         {
-            <div class="col list-search-card" data-search-fields="@($"{professor.Nome} {professor.Email} {professor.Telefone}")">
+            <div class="col list-search-card" data-search-fields="@($"{professor.Nome} {professor.Email} {professor.Telefone} {professor.Especialidades}")">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-                            <h5 class="card-title mb-0" data-search-name>@professor.Nome</h5>
+                            <button type="button"
+                                    class="btn btn-link card-title text-start p-0 mb-0 text-decoration-none"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#perfil-@professor.Id"
+                                    data-search-name>
+                                @professor.Nome
+                            </button>
                             <span class="badge text-bg-primary rounded-pill">Professor</span>
                         </div>
 
@@ -49,9 +65,97 @@ else
                         </dl>
 
                         <div class="d-flex flex-wrap gap-2 mt-auto justify-content-end">
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#perfil-@professor.Id">
+                                Ver perfil
+                            </button>
                             <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="EditarProfessor" asp-route-id="@professor.Id">Editar</a>
                             <a class="btn btn-outline-danger btn-sm rounded-pill px-3" asp-action="ExcluirProfessor" asp-route-id="@professor.Id">Excluir</a>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade"
+                 id="perfil-@professor.Id"
+                 tabindex="-1"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div>
+                                <h2 class="modal-title fs-5">@professor.Nome</h2>
+                                <p class="text-secondary small mb-0">Perfil profissional</p>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        </div>
+
+                        <form asp-action="SalvarPerfilProfessor" method="post">
+                            <div class="modal-body">
+                                <input type="hidden" name="id" value="@professor.Id" />
+
+                                @if (!professor.PerfilCadastrado)
+                                {
+                                    <div class="alert alert-info">
+                                        Este professor ainda não possui os dados profissionais completos.
+                                    </div>
+                                }
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Email</label>
+                                        <input class="form-control" value="@professor.Email" readonly />
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Telefone</label>
+                                        <input class="form-control" value="@professor.Telefone" readonly />
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="data-@professor.Id" class="form-label">Data de contratação</label>
+                                        <input id="data-@professor.Id"
+                                               name="dataContratacao"
+                                               type="date"
+                                               class="form-control"
+                                               value="@professor.DataContratacao.ToString("yyyy-MM-dd")"
+                                               required />
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="especialidades-@professor.Id" class="form-label">Especialidades</label>
+                                    <input id="especialidades-@professor.Id"
+                                           name="especialidades"
+                                           class="form-control"
+                                           maxlength="500"
+                                           value="@professor.Especialidades"
+                                           required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="bio-@professor.Id" class="form-label">Biografia profissional</label>
+                                    <textarea id="bio-@professor.Id"
+                                              name="bio"
+                                              class="form-control"
+                                              rows="5"
+                                              maxlength="1000"
+                                              required>@professor.Bio</textarea>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <a class="btn btn-outline-secondary"
+                                   asp-action="EditarProfessor"
+                                   asp-route-id="@professor.Id">
+                                    Editar conta
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                                <button type="submit" class="btn btn-primary">Salvar perfil</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -73,5 +177,15 @@ else
                 card.style.display = term === '' || fields.includes(term) ? '' : 'none';
             });
         });
+    })();
+
+    (function () {
+        const professorId = new URLSearchParams(window.location.search).get('abrirPerfil');
+        if (!professorId) return;
+
+        const modalElement = document.getElementById('perfil-' + professorId);
+        if (modalElement) {
+            bootstrap.Modal.getOrCreateInstance(modalElement).show();
+        }
     })();
 </script>
