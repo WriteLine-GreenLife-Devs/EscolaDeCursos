@@ -116,6 +116,7 @@ public sealed class ServicoTurma : ServicoBase<Turma>
 
                 return new TurmaProfessorDto(
                     turma.Id,
+                    turma.cursoId,
                     turma.nome,
                     curso?.nome ?? "Curso não encontrado",
                     turma.dataInicio,

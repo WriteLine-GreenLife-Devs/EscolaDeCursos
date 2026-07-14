@@ -13,102 +13,60 @@ public sealed class ConteudoCursoController(
     IMapper mapeador
 ) : Controller
 {
-    [HttpGet]
-    public ActionResult Listar(Guid cursoId)
-    {
-        var viewModel = new ListaModulosCursoViewModel
-        {
-            CursoId = cursoId,
-            Modulos = mapeador.Map<List<ModuloCursoViewModel>>(
-                servicoModuloCurso.SelecionarPorCurso(
-                    cursoId,
-                    incluirInativos: true))
-        };
-
-        return View(viewModel);
-    }
-
-    [HttpGet]
-    public ActionResult Cadastrar(Guid cursoId)
-    {
-        return View(new CadastrarModuloCursoViewModel
-        {
-            CursoId = cursoId
-        });
-    }
-
     [HttpPost]
     public ActionResult Cadastrar(
         CadastrarModuloCursoViewModel viewModel)
     {
         if (!ModelState.IsValid)
-            return View(viewModel);
+            return RedirecionarParaListaDeCursos(
+                "Verifique os dados informados no módulo.");
 
         Result resultado = servicoModuloCurso.Cadastrar(
             mapeador.Map<CadastrarModuloCursoDto>(viewModel));
 
         if (resultado.IsFailed)
-        {
-            AdicionarErros(resultado);
-            return View(viewModel);
-        }
+            return RedirecionarParaListaDeCursos(
+                resultado.Errors.First().Message);
 
-        TempData["MensagemModuloSucesso"] =
+        TempData["MensagemSucesso"] =
             "Módulo cadastrado com sucesso.";
 
-        return RedirectToAction(
-            nameof(Listar),
-            new { cursoId = viewModel.CursoId });
-    }
-
-    [HttpGet]
-    public ActionResult Editar(Guid id)
-    {
-        ModuloCursoDto? modulo = servicoModuloCurso.SelecionarPorId(id);
-
-        if (modulo == null)
-            return NotFound();
-
-        return View(
-            mapeador.Map<EditarModuloCursoViewModel>(modulo));
+        return RedirecionarParaListaDeCursos();
     }
 
     [HttpPost]
     public ActionResult Editar(EditarModuloCursoViewModel viewModel)
     {
         if (!ModelState.IsValid)
-            return View(viewModel);
+            return RedirecionarParaListaDeCursos(
+                "Verifique os dados informados no módulo.");
 
         Result resultado = servicoModuloCurso.Editar(
             mapeador.Map<EditarModuloCursoDto>(viewModel));
 
         if (resultado.IsFailed)
-        {
-            AdicionarErros(resultado);
-            return View(viewModel);
-        }
+            return RedirecionarParaListaDeCursos(
+                resultado.Errors.First().Message);
 
-        TempData["MensagemModuloSucesso"] =
+        TempData["MensagemSucesso"] =
             "Módulo atualizado com sucesso.";
 
-        return RedirectToAction(
-            nameof(Listar),
-            new { cursoId = viewModel.CursoId });
+        return RedirecionarParaListaDeCursos();
     }
 
     [HttpPost]
     public ActionResult Desativar(Guid id)
     {
-        return AlterarSituacao(id, reativar: false);
+        return AlterarSituacaoDoModulo(id, reativar: false);
     }
 
     [HttpPost]
     public ActionResult Reativar(Guid id)
     {
-        return AlterarSituacao(id, reativar: true);
+        return AlterarSituacaoDoModulo(id, reativar: true);
     }
 
-    private ActionResult AlterarSituacao(
+    private ActionResult AlterarSituacaoDoModulo(
         Guid moduloCursoId,
         bool reativar)
     {
@@ -124,32 +82,25 @@ public sealed class ConteudoCursoController(
 
         if (resultado.IsFailed)
         {
-            TempData["MensagemModuloErro"] =
+            TempData["MensagemErro"] =
                 resultado.Errors.First().Message;
         }
         else
         {
-            TempData["MensagemModuloSucesso"] = reativar
+            TempData["MensagemSucesso"] = reativar
                 ? "Módulo reativado com sucesso."
                 : "Módulo desativado com sucesso.";
         }
 
-        return RedirectToAction(
-            nameof(Listar),
-            new { cursoId = modulo.CursoId });
+        return RedirecionarParaListaDeCursos();
     }
 
-    private void AdicionarErros(Result resultado)
+    private ActionResult RedirecionarParaListaDeCursos(
+        string? mensagemErro = null)
     {
-        foreach (IError erro in resultado.Errors)
-        {
-            string campo = erro.Metadata.TryGetValue(
-                "Campo",
-                out object? valorCampo)
-                ? valorCampo?.ToString() ?? string.Empty
-                : string.Empty;
+        if (!string.IsNullOrWhiteSpace(mensagemErro))
+            TempData["MensagemErro"] = mensagemErro;
 
-            ModelState.AddModelError(campo, erro.Message);
-        }
+        return RedirectToAction("ListarCursos", "ADM");
     }
 }

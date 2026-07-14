@@ -2,11 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 
-public class CadastrarModuloCursoViewModel
+public abstract class ModuloCursoFormularioViewModel
 {
-    [Required(ErrorMessage = "O curso é obrigatório.")]
-    public Guid CursoId { get; set; }
-
     [Required(ErrorMessage = "O título é obrigatório.")]
     [StringLength(
         100,
@@ -38,8 +35,15 @@ public class CadastrarModuloCursoViewModel
     public int Ordem { get; set; }
 }
 
+public sealed class CadastrarModuloCursoViewModel
+    : ModuloCursoFormularioViewModel
+{
+    [Required(ErrorMessage = "O curso é obrigatório.")]
+    public Guid CursoId { get; set; }
+}
+
 public sealed class EditarModuloCursoViewModel
-    : CadastrarModuloCursoViewModel
+    : ModuloCursoFormularioViewModel
 {
     public Guid Id { get; set; }
 }
@@ -54,9 +58,10 @@ public sealed record ModuloCursoViewModel(
     bool Ativo
 );
 
-public sealed class ListaModulosCursoViewModel
+public sealed class ModulosCursoParcialViewModel
 {
     public Guid CursoId { get; init; }
+    public bool PermiteEdicao { get; init; }
     public List<ModuloCursoViewModel> Modulos { get; init; } = [];
 }
 
@@ -90,3 +95,11 @@ public sealed record ResumoProgressoModuloAlunoViewModel(
     int PercentualConclusao,
     List<ModuloProgressoAlunoViewModel> Modulos
 );
+
+public sealed class ProgressoModulosParcialViewModel
+{
+    public ResumoProgressoModuloAlunoViewModel Progresso { get; init; }
+        = null!;
+
+    public bool PermiteEdicao { get; init; }
+}

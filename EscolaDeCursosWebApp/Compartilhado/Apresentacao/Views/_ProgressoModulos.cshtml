@@ -1,0 +1,59 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao.ProgressoModulosParcialViewModel
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h3 class="h6 mb-0">Progresso dos módulos</h3>
+    <strong>@Model.Progresso.PercentualConclusao%</strong>
+</div>
+
+<div class="progress mb-3" role="progressbar"
+     aria-valuenow="@Model.Progresso.PercentualConclusao"
+     aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar" style="width: @Model.Progresso.PercentualConclusao%"></div>
+</div>
+
+@if (Model.Progresso.Modulos.Count == 0)
+{
+    <div class="alert alert-info mb-0">
+        Nenhum módulo disponível.
+    </div>
+}
+else
+{
+    <div class="vstack gap-2">
+        @foreach (var modulo in Model.Progresso.Modulos.OrderBy(modulo => modulo.Ordem))
+        {
+            <div class="border rounded p-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                    <div>
+                        <strong class="d-block">@modulo.Ordem. @modulo.Titulo</strong>
+                        <span class="text-secondary small d-block mb-1">@modulo.Descricao</span>
+                        <span class="small">@modulo.DuracaoMinutos min</span>
+                    </div>
+
+                    @if (Model.PermiteEdicao)
+                    {
+                        <form asp-controller="ProgressoModulo"
+                              asp-action="AtualizarConclusao" method="post">
+                            <input type="hidden" name="MatriculaId"
+                                   value="@Model.Progresso.MatriculaId" />
+                            <input type="hidden" name="ModuloCursoId"
+                                   value="@modulo.ModuloCursoId" />
+                            <input type="hidden" name="Concluido"
+                                   value="@(!modulo.Concluido).ToString().ToLowerInvariant()" />
+                            <button type="submit"
+                                    class="btn @(modulo.Concluido ? "btn-outline-secondary" : "btn-outline-success") btn-sm">
+                                @(modulo.Concluido ? "Marcar como pendente" : "Marcar como concluído")
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="badge @(modulo.Concluido ? "text-bg-success" : "text-bg-secondary")">
+                            @(modulo.Concluido ? "Concluído" : "Pendente")
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

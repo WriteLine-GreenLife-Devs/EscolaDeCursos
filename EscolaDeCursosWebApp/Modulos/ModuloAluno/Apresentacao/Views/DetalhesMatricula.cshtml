@@ -30,6 +30,16 @@
         </button>
     </div>
 
+    @if (TempData["MensagemProgressoErro"] is string mensagemProgressoErro)
+    {
+        <div class="alert alert-danger">@mensagemProgressoErro</div>
+    }
+
+    @if (TempData["MensagemProgressoSucesso"] is string mensagemProgressoSucesso)
+    {
+        <div class="alert alert-success">@mensagemProgressoSucesso</div>
+    }
+
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
@@ -100,7 +110,7 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="conteudo-tab" data-bs-toggle="tab" data-bs-target="#conteudo"
                             type="button" role="tab">
-                        Conteúdo do curso
+                        Módulos
                     </button>
                 </li>
             </ul>
@@ -250,11 +260,22 @@
                 </div>
 
                 <div class="tab-pane fade" id="conteudo" role="tabpanel" aria-labelledby="conteudo-tab">
-                    <h2 class="h5">Conteúdo do curso</h2>
-
-                    <div class="alert alert-info mb-0">
-                        Nenhum conteúdo disponível para este curso.
-                    </div>
+                    @if (Model.ProgressoModulos == null)
+                    {
+                        <div class="alert alert-info mb-0">
+                            Nenhum módulo disponível.
+                        </div>
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync(
+                            "_ProgressoModulos",
+                            new EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao.ProgressoModulosParcialViewModel
+                            {
+                                Progresso = Model.ProgressoModulos,
+                                PermiteEdicao = true
+                            })
+                    }
                 </div>
             </div>
         </div>

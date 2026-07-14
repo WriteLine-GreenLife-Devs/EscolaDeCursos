@@ -1,4 +1,5 @@
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 
@@ -35,6 +36,7 @@ public sealed record MatriculaAlunoADMViewModel(
     int FrequenciaPercentual,
     int TotalPresencas,
     int TotalPresentes,
+    ResumoProgressoModuloAlunoViewModel? ProgressoModulos,
     List<PresencaAlunoADMViewModel> Presencas
 );
 

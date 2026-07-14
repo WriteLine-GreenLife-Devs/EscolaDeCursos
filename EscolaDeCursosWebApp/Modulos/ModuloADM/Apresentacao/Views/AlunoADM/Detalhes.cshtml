@@ -69,6 +69,19 @@ else
                         </div>
                     </div>
 
+                    @if (matricula.ProgressoModulos != null)
+                    {
+                        <div class="mb-4">
+                            @await Html.PartialAsync(
+                                "_ProgressoModulos",
+                                new EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao.ProgressoModulosParcialViewModel
+                                {
+                                    Progresso = matricula.ProgressoModulos,
+                                    PermiteEdicao = false
+                                })
+                        </div>
+                    }
+
                     <div class="table-responsive mb-3">
                         <table class="table table-sm text-center align-middle mb-0">
                             <thead>

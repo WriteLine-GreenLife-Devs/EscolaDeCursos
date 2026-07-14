@@ -10,6 +10,9 @@ using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -32,7 +35,10 @@ public class ADMController(
     ServicoMatricula servicoMatricula,
     IRepositorioMatricula repositorioMatricula,
     ServicoNotaAluno servicoNotaAluno,
-    ServicoPresencaAluno servicoPresencaAluno
+    ServicoPresencaAluno servicoPresencaAluno,
+    ServicoModuloCurso servicoModuloCurso,
+    ServicoProgressoModuloAluno servicoProgressoModuloAluno,
+    IMapper mapeador
 ) : Controller
 {
     [HttpGet]
@@ -161,7 +167,16 @@ public class ADMController(
                 NivelDificuldade = curso.nivelDificuldade,
                 Status = curso.status,
                 Valor = curso.valor,
-                CategoriaNome = categorias.TryGetValue(curso.categoriaId, out var nomeCategoria) ? nomeCategoria : "-"
+                CategoriaNome = categorias.TryGetValue(curso.categoriaId, out var nomeCategoria) ? nomeCategoria : "-",
+                ModulosCurso = new ModulosCursoParcialViewModel
+                {
+                    CursoId = curso.Id,
+                    PermiteEdicao = true,
+                    Modulos = mapeador.Map<List<ModuloCursoViewModel>>(
+                        servicoModuloCurso.SelecionarPorCurso(
+                            curso.Id,
+                            incluirInativos: true))
+                }
             })
             .ToList();
 
@@ -813,6 +828,10 @@ public class ADMController(
                                 totalPresentes * 100d / presencas.Count),
                         presencas.Count,
                         totalPresentes,
+                        mapeador.Map<ResumoProgressoModuloAlunoViewModel>(
+                            servicoProgressoModuloAluno
+                                .SelecionarProgressoDaMatricula(
+                                    matricula.Id)),
                         presencas
                             .OrderByDescending(presenca => presenca.DataAula)
                             .Select(presenca => new PresencaAlunoADMViewModel(

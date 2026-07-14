@@ -2,6 +2,8 @@ using System.Security.Claims;
 using AutoMapper;
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +18,7 @@ public sealed class AlunoController(
     ServicoNotaAluno servicoNotaAluno,
     ServicoPresencaAluno servicoPresencaAluno,
     ServicoMatricula servicoMatricula,
+    ServicoProgressoModuloAluno servicoProgressoModuloAluno,
     IMapper mapeador
 ) : Controller
 {
@@ -101,7 +104,11 @@ public sealed class AlunoController(
             Notas = mapeador.Map<List<NotaAlunoViewModel>>(
                 servicoNotaAluno.SelecionarPorMatricula(id)),
             Presencas = mapeador.Map<List<PresencaAlunoViewModel>>(
-                servicoPresencaAluno.SelecionarPorMatricula(id))
+                servicoPresencaAluno.SelecionarPorMatricula(id)),
+            ProgressoModulos = mapeador
+                .Map<ResumoProgressoModuloAlunoViewModel>(
+                    servicoProgressoModuloAluno
+                        .SelecionarProgressoDoAluno(id, alunoId))
         };
 
         return View(viewModel);

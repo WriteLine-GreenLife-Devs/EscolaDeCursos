@@ -1,8 +1,11 @@
 using System.Security.Claims;
+using AutoMapper;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +20,10 @@ public sealed class ProfessorController(
     ServicoProfessor servicoProfessor,
     ServicoNotaAluno servicoNotaAluno,
     ServicoAluno servicoAluno,
-    ServicoPresencaAluno servicoPresencaAluno
+    ServicoPresencaAluno servicoPresencaAluno,
+    ServicoModuloCurso servicoModuloCurso,
+    ServicoProgressoModuloAluno servicoProgressoModuloAluno,
+    IMapper mapeador
 ) : Controller
 {
     [HttpGet]
@@ -30,6 +36,7 @@ public sealed class ProfessorController(
             .SelecionarPorProfessor(professorId)
             .Select(turma => new TurmaProfessorViewModel(
                 turma.Id,
+                turma.CursoId,
                 turma.Nome,
                 turma.CursoNome,
                 turma.DataInicio,
@@ -131,6 +138,7 @@ public sealed class ProfessorController(
             .Where(turmaProfessor => turmaProfessor.Id == id)
             .Select(turmaProfessor => new TurmaProfessorViewModel(
                 turmaProfessor.Id,
+                turmaProfessor.CursoId,
                 turmaProfessor.Nome,
                 turmaProfessor.CursoNome,
                 turmaProfessor.DataInicio,
@@ -201,6 +209,10 @@ public sealed class ProfessorController(
                     ficha?.Nota3,
                     ficha?.Recuperacao,
                     ficha?.NotaFinal,
+                    mapeador.Map<ResumoProgressoModuloAlunoViewModel>(
+                        servicoProgressoModuloAluno
+                            .SelecionarProgressoDaMatricula(
+                                matricula.MatriculaId)),
                     matriculas);
             })
             .OrderBy(aluno => aluno.Nome)
@@ -222,6 +234,14 @@ public sealed class ProfessorController(
             DataInicio = turmaResumo.DataInicio,
             DataFim = turmaResumo.DataFim,
             VagasMaximas = turma.VagasMaximas,
+            ModulosCurso = new ModulosCursoParcialViewModel
+            {
+                CursoId = turmaResumo.CursoId,
+                PermiteEdicao = false,
+                Modulos = mapeador.Map<List<ModuloCursoViewModel>>(
+                    servicoModuloCurso.SelecionarPorCurso(
+                        turmaResumo.CursoId))
+            },
             Alunos = alunos,
             Chamadas = datasChamadas
                 .Select(data => new ChamadaProfessorViewModel(

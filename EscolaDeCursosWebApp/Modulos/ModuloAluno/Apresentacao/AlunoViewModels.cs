@@ -2,6 +2,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloAluno.Apresentacao;
 
@@ -125,6 +126,8 @@ public sealed class DetalhesMatriculaAlunoViewModel
     public MatriculaPainelAlunoViewModel Matricula { get; init; } = null!;
     public List<NotaAlunoViewModel> Notas { get; init; } = [];
     public List<PresencaAlunoViewModel> Presencas { get; init; } = [];
+    public ResumoProgressoModuloAlunoViewModel? ProgressoModulos
+        { get; init; }
 
     public int FrequenciaPercentual
     {

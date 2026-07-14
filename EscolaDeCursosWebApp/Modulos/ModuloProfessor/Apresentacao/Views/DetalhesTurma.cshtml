@@ -51,6 +51,12 @@
         <div class="alert alert-success">@mensagemChamadaSucesso</div>
     }
 
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            @await Html.PartialAsync("_ModulosCurso", Model.ModulosCurso)
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             @if (Model.Alunos.Count == 0)
@@ -72,6 +78,7 @@
                                 <th class="text-center">Nota 3</th>
                                 <th class="text-center">Recuperação</th>
                                 <th class="text-center">Final</th>
+                                <th class="text-center">Progresso</th>
                                 <th class="text-center">Frequência</th>
                                 <th class="text-end">Ações</th>
                             </tr>
@@ -96,6 +103,11 @@
                                     <td class="text-center">@(aluno.Nota3?.ToString("0.00") ?? "-")</td>
                                     <td class="text-center">@(aluno.Recuperacao?.ToString("0.00") ?? "-")</td>
                                     <td class="text-center fw-semibold">@(aluno.NotaFinal?.ToString("0.00") ?? "-")</td>
+                                    <td class="text-center">
+                                        @(aluno.ProgressoModulos == null
+                                            ? "-"
+                                            : $"{aluno.ProgressoModulos.PercentualConclusao}%")
+                                    </td>
                                     <td class="text-center">
                                         @if (matriculaAtual?.TotalPresencas > 0)
                                         {
@@ -332,6 +344,19 @@
                             </span>
                         </div>
                     </div>
+
+                    @if (aluno.ProgressoModulos != null)
+                    {
+                        <div class="mb-4">
+                            @await Html.PartialAsync(
+                                "_ProgressoModulos",
+                                new EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao.ProgressoModulosParcialViewModel
+                                {
+                                    Progresso = aluno.ProgressoModulos,
+                                    PermiteEdicao = false
+                                })
+                        </div>
+                    }
 
                     <h3 class="h6 mb-3">Cursos e frequência</h3>
 

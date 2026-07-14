@@ -98,6 +98,7 @@ public sealed class ExcluirTurmaDto
 
 public sealed record TurmaProfessorDto(
     Guid Id,
+    Guid CursoId,
     string Nome,
     string CursoNome,
     DateTime DataInicio,

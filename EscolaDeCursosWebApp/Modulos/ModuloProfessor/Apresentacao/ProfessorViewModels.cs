@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
 
@@ -83,6 +84,7 @@ public sealed record CursoProfessorViewModel(
 
 public sealed record TurmaProfessorViewModel(
     Guid Id,
+    Guid CursoId,
     string Nome,
     string CursoNome,
     DateTime DataInicio,
@@ -99,6 +101,7 @@ public sealed class DetalhesTurmaProfessorViewModel
     public DateTime DataInicio { get; init; }
     public DateTime DataFim { get; init; }
     public int VagasMaximas { get; init; }
+    public ModulosCursoParcialViewModel ModulosCurso { get; init; } = new();
     public List<AlunoTurmaProfessorViewModel> Alunos { get; init; } = [];
     public List<ChamadaProfessorViewModel> Chamadas { get; init; } = [];
 }
@@ -117,6 +120,7 @@ public sealed record AlunoTurmaProfessorViewModel(
     double? Nota3,
     double? Recuperacao,
     double? NotaFinal,
+    ResumoProgressoModuloAlunoViewModel? ProgressoModulos,
     List<MatriculaAlunoProfessorViewModel> Matriculas
 );
 

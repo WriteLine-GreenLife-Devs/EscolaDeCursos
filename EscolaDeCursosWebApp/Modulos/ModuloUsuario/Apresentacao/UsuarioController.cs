@@ -58,7 +58,6 @@ public class UsuarioController(
     {
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha))
         {
-            //ModelState.AddModelError(string.Empty, "Email e senha são obrigatórios.");
             TempData["LoginError"] = "Email e senha são obrigatórios.";
             return RedirectToAction("Index", "Home");
         }

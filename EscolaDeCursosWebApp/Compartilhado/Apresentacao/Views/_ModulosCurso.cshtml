@@ -1,0 +1,178 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao.ModulosCursoParcialViewModel
+
+@{
+    string identificadorCurso = Model.CursoId.ToString("N");
+}
+
+<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+    <h3 class="h6 mb-0">Módulos</h3>
+
+    @if (Model.PermiteEdicao)
+    {
+        <button type="button" class="btn btn-outline-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#cadastrarModulo-@identificadorCurso">
+            Adicionar módulo
+        </button>
+    }
+</div>
+
+@if (Model.Modulos.Count == 0)
+{
+    <div class="alert alert-info mb-0">
+        Nenhum módulo cadastrado.
+    </div>
+}
+else
+{
+    <div class="vstack gap-2">
+        @foreach (var modulo in Model.Modulos.OrderBy(modulo => modulo.Ordem))
+        {
+            <div class="border rounded p-3">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <strong>@modulo.Ordem. @modulo.Titulo</strong>
+                            <span class="badge @(modulo.Ativo ? "text-bg-success" : "text-bg-secondary")">
+                                @(modulo.Ativo ? "Ativo" : "Inativo")
+                            </span>
+                        </div>
+                        <p class="text-secondary small mb-1">@modulo.Descricao</p>
+                        <span class="small">@modulo.DuracaoMinutos min</span>
+                    </div>
+
+                    @if (Model.PermiteEdicao)
+                    {
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editarModulo-@modulo.Id.ToString("N")">
+                                Editar
+                            </button>
+
+                            <form asp-controller="ConteudoCurso"
+                                  asp-action="@(modulo.Ativo ? "Desativar" : "Reativar")"
+                                  method="post">
+                                <input type="hidden" name="id" value="@modulo.Id" />
+                                <button type="submit"
+                                        class="btn @(modulo.Ativo ? "btn-outline-danger" : "btn-outline-success") btn-sm">
+                                    @(modulo.Ativo ? "Desativar" : "Reativar")
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (Model.PermiteEdicao)
+{
+    <div class="modal fade" id="cadastrarModulo-@identificadorCurso"
+         tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-controller="ConteudoCurso" asp-action="Cadastrar" method="post">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5">Adicionar módulo</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Fechar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="CursoId" value="@Model.CursoId" />
+
+                        <div class="mb-3">
+                            <label class="form-label" for="tituloModulo-@identificadorCurso">Título</label>
+                            <input class="form-control" id="tituloModulo-@identificadorCurso"
+                                   name="Titulo" maxlength="100" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="descricaoModulo-@identificadorCurso">Descrição</label>
+                            <textarea class="form-control" id="descricaoModulo-@identificadorCurso"
+                                      name="Descricao" maxlength="1000" rows="3" required></textarea>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label" for="duracaoModulo-@identificadorCurso">Duração em minutos</label>
+                                <input class="form-control" id="duracaoModulo-@identificadorCurso"
+                                       name="DuracaoMinutos" type="number" min="1" required />
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="form-label" for="ordemModulo-@identificadorCurso">Ordem</label>
+                                <input class="form-control" id="ordemModulo-@identificadorCurso"
+                                       name="Ordem" type="number" min="1" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @foreach (var modulo in Model.Modulos)
+    {
+        <div class="modal fade" id="editarModulo-@modulo.Id.ToString("N")"
+             tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form asp-controller="ConteudoCurso" asp-action="Editar" method="post">
+                        <div class="modal-header">
+                            <h2 class="modal-title fs-5">Editar módulo</h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Fechar"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <input type="hidden" name="Id" value="@modulo.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label" for="tituloModulo-@modulo.Id.ToString("N")">Título</label>
+                                <input class="form-control" id="tituloModulo-@modulo.Id.ToString("N")"
+                                       name="Titulo" value="@modulo.Titulo" maxlength="100" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="descricaoModulo-@modulo.Id.ToString("N")">Descrição</label>
+                                <textarea class="form-control" id="descricaoModulo-@modulo.Id.ToString("N")"
+                                          name="Descricao" maxlength="1000" rows="3" required>@modulo.Descricao</textarea>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="duracaoModulo-@modulo.Id.ToString("N")">Duração em minutos</label>
+                                    <input class="form-control" id="duracaoModulo-@modulo.Id.ToString("N")"
+                                           name="DuracaoMinutos" type="number" min="1"
+                                           value="@modulo.DuracaoMinutos" required />
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="ordemModulo-@modulo.Id.ToString("N")">Ordem</label>
+                                    <input class="form-control" id="ordemModulo-@modulo.Id.ToString("N")"
+                                           name="Ordem" type="number" min="1"
+                                           value="@modulo.Ordem" required />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}

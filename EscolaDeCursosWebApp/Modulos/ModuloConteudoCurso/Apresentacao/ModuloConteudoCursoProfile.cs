@@ -10,7 +10,6 @@ public sealed class ModuloConteudoCursoProfile : Profile
         CreateMap<CadastrarModuloCursoViewModel, CadastrarModuloCursoDto>();
         CreateMap<EditarModuloCursoViewModel, EditarModuloCursoDto>();
         CreateMap<ModuloCursoDto, ModuloCursoViewModel>();
-        CreateMap<ModuloCursoDto, EditarModuloCursoViewModel>();
         CreateMap<AtualizarConclusaoModuloAlunoViewModel,
             AtualizarConclusaoModuloAlunoDto>();
         CreateMap<ModuloProgressoAlunoDto,
