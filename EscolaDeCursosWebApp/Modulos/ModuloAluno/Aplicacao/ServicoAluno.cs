@@ -2,6 +2,7 @@ using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using FluentResults;
@@ -14,6 +15,7 @@ public sealed class ServicoAluno : ServicoBase<Aluno>
     private readonly IRepositorioMatricula repositorioMatricula;
     private readonly IRepositorioTurma repositorioTurma;
     private readonly IRepositorioCurso repositorioCurso;
+    private readonly IRepositorioProfessor repositorioProfessor;
     private readonly IRepositorioUsuario repositorioUsuario;
 
     public ServicoAluno(
@@ -21,12 +23,14 @@ public sealed class ServicoAluno : ServicoBase<Aluno>
         IRepositorioMatricula repositorioMatricula,
         IRepositorioTurma repositorioTurma,
         IRepositorioCurso repositorioCurso,
+        IRepositorioProfessor repositorioProfessor,
         IRepositorioUsuario repositorioUsuario)
     {
         this.repositorioAluno = repositorioAluno;
         this.repositorioMatricula = repositorioMatricula;
         this.repositorioTurma = repositorioTurma;
         this.repositorioCurso = repositorioCurso;
+        this.repositorioProfessor = repositorioProfessor;
         this.repositorioUsuario = repositorioUsuario;
     }
 
@@ -156,13 +160,39 @@ public sealed class ServicoAluno : ServicoBase<Aluno>
 
         Curso? curso = repositorioCurso.SelecionarPorId(turma.cursoId);
 
+        if (curso == null)
+            return null;
+
+        Usuario? usuarioProfessor = repositorioUsuario.SelecionarPorId(
+            turma.instrutorId);
+
+        Professor? professor = repositorioProfessor.SelecionarPorId(
+            turma.instrutorId);
+
         return new MatriculaPainelAlunoDto(
             matricula.Id,
-            turma.Id,
-            turma.nome,
-            curso?.nome ?? string.Empty,
+            new TurmaResumoAlunoDto(
+                turma.Id,
+                turma.nome,
+                turma.dataInicio,
+                turma.dataFim,
+                turma.HorarioTurno,
+                turma.status),
+            new CursoResumoAlunoDto(
+                curso.Id,
+                curso.nome,
+                curso.descricao,
+                curso.cargaHoraria,
+                curso.nivelDificuldade),
+            new ProfessorResumoAlunoDto(
+                turma.instrutorId,
+                usuarioProfessor?.nome ?? "Professor não informado",
+                usuarioProfessor?.email ?? string.Empty,
+                professor?.Bio ?? string.Empty,
+                professor?.Especialidades ?? string.Empty),
             matricula.DataMatricula,
-            matricula.Situacao
+            matricula.Situacao,
+            matricula.NotaFinal
         );
     }
 

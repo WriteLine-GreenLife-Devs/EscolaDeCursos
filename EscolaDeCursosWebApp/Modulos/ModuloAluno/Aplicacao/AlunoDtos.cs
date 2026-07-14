@@ -1,5 +1,7 @@
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
+using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 
@@ -26,13 +28,39 @@ public record DetalhesAlunoDto(
     bool Ativo
 );
 
+public record TurmaResumoAlunoDto(
+    Guid Id,
+    string Nome,
+    DateTime DataInicio,
+    DateTime DataFim,
+    string HorarioTurno,
+    StatusTurma Status
+);
+
+public record CursoResumoAlunoDto(
+    Guid Id,
+    string Nome,
+    string Descricao,
+    int CargaHoraria,
+    NivelDificuldade NivelDificuldade
+);
+
+public record ProfessorResumoAlunoDto(
+    Guid Id,
+    string Nome,
+    string Email,
+    string Bio,
+    string Especialidades
+);
+
 public record MatriculaPainelAlunoDto(
     Guid Id,
-    Guid TurmaId,
-    string TurmaNome,
-    string CursoNome,
+    TurmaResumoAlunoDto Turma,
+    CursoResumoAlunoDto Curso,
+    ProfessorResumoAlunoDto Professor,
     DateTime DataMatricula,
-    SituacaoMatricula Situacao
+    SituacaoMatricula Situacao,
+    double? NotaFinal
 );
 
 public record CadastrarNotaAlunoDto(

@@ -1,0 +1,308 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloAluno.Apresentacao.DetalhesMatriculaAlunoViewModel
+
+@{
+    Layout = "_LayoutPaginaInicial";
+    ViewBag.Titulo = Model.Matricula.Curso.Nome;
+
+    int totalPresencas = Model.Presencas.Count;
+    int totalPresentes = Model.Presencas.Count(presenca => presenca.Presente);
+}
+
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3">
+                Voltar para minhas turmas
+            </a>
+
+            <p class="text-secondary small mb-1">@Model.Matricula.Turma.Nome</p>
+            <h1 class="h3 mb-1">@Model.Matricula.Curso.Nome</h1>
+            <p class="text-secondary mb-0">
+                @Model.Matricula.Turma.DataInicio.ToString("dd/MM/yyyy")
+                a
+                @Model.Matricula.Turma.DataFim.ToString("dd/MM/yyyy")
+            </p>
+        </div>
+
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                data-bs-target="#modalProfessorTurma">
+            Ver professor
+        </button>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <span class="text-secondary small">Situação</span>
+                    <strong class="d-block fs-5">@Model.Matricula.Situacao</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <span class="text-secondary small">Nota final</span>
+                    <strong class="d-block fs-5">
+                        @(Model.Matricula.NotaFinal?.ToString("0.00") ?? "Não calculada")
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <span class="text-secondary small">Frequência registrada</span>
+                    <strong class="d-block fs-5">@Model.FrequenciaPercentual%</strong>
+                    <small class="text-secondary">@totalPresentes de @totalPresencas registros</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <span class="text-secondary small">Progresso da turma</span>
+                    <strong class="d-block fs-5">
+                        @Model.Matricula.ProgressoCronologicoPercentual%
+                    </strong>
+                    <small class="text-secondary">Baseado no período</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-bottom pt-3 px-3">
+            <ul class="nav nav-tabs card-header-tabs" id="abasMatricula" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="visao-geral-tab" data-bs-toggle="tab"
+                            data-bs-target="#visao-geral" type="button" role="tab">
+                        Visão geral
+                    </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="notas-tab" data-bs-toggle="tab" data-bs-target="#notas" type="button"
+                            role="tab">
+                        Notas
+                    </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="presencas-tab" data-bs-toggle="tab" data-bs-target="#presencas"
+                            type="button" role="tab">
+                        Presenças
+                    </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="conteudo-tab" data-bs-toggle="tab" data-bs-target="#conteudo"
+                            type="button" role="tab">
+                        Conteúdo do curso
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="tab-content" id="conteudoAbasMatricula">
+                <div class="tab-pane fade show active" id="visao-geral" role="tabpanel"
+                     aria-labelledby="visao-geral-tab">
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <h2 class="h5">Sobre o curso</h2>
+                            <p>@Model.Matricula.Curso.Descricao</p>
+
+                            <dl class="row g-2 mb-0">
+                                <dt class="col-sm-5 text-secondary">Nível</dt>
+                                <dd class="col-sm-7">@Model.Matricula.Curso.NivelDificuldade</dd>
+
+                                <dt class="col-sm-5 text-secondary">Carga horária</dt>
+                                <dd class="col-sm-7">@Model.Matricula.Curso.CargaHoraria horas</dd>
+
+                                <dt class="col-sm-5 text-secondary">Data da matrícula</dt>
+                                <dd class="col-sm-7">@Model.Matricula.DataMatricula.ToString("dd/MM/yyyy")</dd>
+                            </dl>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <h2 class="h5">Informações da turma</h2>
+
+                            <dl class="row g-2 mb-3">
+                                <dt class="col-5 text-secondary">Turma</dt>
+                                <dd class="col-7">@Model.Matricula.Turma.Nome</dd>
+
+                                <dt class="col-5 text-secondary">Horário</dt>
+                                <dd class="col-7">@Model.Matricula.Turma.HorarioTurno</dd>
+
+                                <dt class="col-5 text-secondary">Situação</dt>
+                                <dd class="col-7">@Model.Matricula.Turma.Status</dd>
+
+                                <dt class="col-5 text-secondary">Professor</dt>
+                                <dd class="col-7">
+                                    <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal"
+                                            data-bs-target="#modalProfessorTurma">
+                                        @Model.Matricula.Professor.Nome
+                                    </button>
+                                </dd>
+                            </dl>
+
+                            <div class="progress mb-2" role="progressbar" aria-label="Progresso cronológico da turma"
+                                 aria-valuenow="@Model.Matricula.ProgressoCronologicoPercentual" aria-valuemin="0"
+                                 aria-valuemax="100">
+                                <div class="progress-bar"
+                                     style="width: @Model.Matricula.ProgressoCronologicoPercentual%">
+                                </div>
+                            </div>
+
+                            <small class="text-secondary">
+                                O progresso por conteúdos será calculado pelo módulo de Curso.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="notas" role="tabpanel" aria-labelledby="notas-tab">
+                    <h2 class="h5 mb-3">Notas da matrícula</h2>
+
+                    @if (Model.Notas.Count == 0)
+                    {
+                        <div class="alert alert-info mb-0">
+                            Nenhuma nota foi lançada para esta matrícula.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Descrição</th>
+                                        <th>Data</th>
+                                        <th class="text-end">Nota</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var nota in Model.Notas)
+                                    {
+                                        <tr>
+                                            <td>@nota.TipoNota</td>
+                                            <td>@nota.Descricao</td>
+                                            <td>@nota.DataLancamento.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-end fw-semibold">@nota.Valor.ToString("0.00")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+
+                <div class="tab-pane fade" id="presencas" role="tabpanel" aria-labelledby="presencas-tab">
+                    <div class="d-flex justify-content-between align-items-end gap-3 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1">Histórico de presença</h2>
+                            <p class="text-secondary mb-0">
+                                Frequência registrada: @Model.FrequenciaPercentual%
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (Model.Presencas.Count == 0)
+                    {
+                        <div class="alert alert-info mb-0">
+                            Nenhuma presença foi registrada para esta matrícula.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Situação</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var presenca in Model.Presencas)
+                                    {
+                                        <tr>
+                                            <td>@presenca.DataAula.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                @if (presenca.Presente)
+                                                {
+                                                    <span class="badge text-bg-success">Presente</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge text-bg-danger">Ausente</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+
+                <div class="tab-pane fade" id="conteudo" role="tabpanel" aria-labelledby="conteudo-tab">
+                    <h2 class="h5">Conteúdo do curso</h2>
+
+                    <div class="alert alert-info mb-0">
+                        Esta área está preparada para receber aulas, materiais e progresso de conteúdo diretamente do
+                        módulo de Curso.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalProfessorTurma" tabindex="-1" aria-labelledby="tituloModalProfessorTurma"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title fs-5" id="tituloModalProfessorTurma">
+                        @Model.Matricula.Professor.Nome
+                    </h2>
+                    <p class="text-secondary small mb-0">Professor da turma</p>
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <dl class="row g-2 mb-3">
+                    <dt class="col-4">Email</dt>
+                    <dd class="col-8 text-break">
+                        @(string.IsNullOrWhiteSpace(Model.Matricula.Professor.Email) ? "-" :
+                        Model.Matricula.Professor.Email)
+                    </dd>
+
+                    <dt class="col-4">Especialidades</dt>
+                    <dd class="col-8">
+                        @(string.IsNullOrWhiteSpace(Model.Matricula.Professor.Especialidades) ? "Não informado" :
+                        Model.Matricula.Professor.Especialidades)
+                    </dd>
+                </dl>
+
+                <h3 class="h6">Biografia profissional</h3>
+                <p class="mb-0">
+                    @(string.IsNullOrWhiteSpace(Model.Matricula.Professor.Bio) ? "Biografia não informada." :
+                    Model.Matricula.Professor.Bio)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

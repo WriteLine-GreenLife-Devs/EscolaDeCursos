@@ -10,6 +10,9 @@ public sealed class AlunoProfile : Profile
     {
         CreateMap<CadastrarUsuarioViewModel, CadastrarAlunoDto>();
         CreateMap<DetalhesAlunoDto, DetalhesAlunoViewModel>();
+        CreateMap<TurmaResumoAlunoDto, TurmaResumoAlunoViewModel>();
+        CreateMap<CursoResumoAlunoDto, CursoResumoAlunoViewModel>();
+        CreateMap<ProfessorResumoAlunoDto, ProfessorResumoAlunoViewModel>();
         CreateMap<MatriculaPainelAlunoDto, MatriculaPainelAlunoViewModel>();
         CreateMap<NotaAlunoDto, NotaAlunoViewModel>();
         CreateMap<PresencaAlunoDto, PresencaAlunoViewModel>();

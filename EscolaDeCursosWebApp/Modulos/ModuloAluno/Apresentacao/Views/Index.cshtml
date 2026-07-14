@@ -1,0 +1,260 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloAluno.Apresentacao.PainelAlunoViewModel
+
+@{
+    Layout = "_LayoutPaginaInicial";
+    ViewBag.Titulo = "Área do Aluno";
+
+    int matriculasCursando = Model.Matriculas.Count(matricula =>
+        matricula.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando);
+
+    int matriculasConcluidas = Model.Matriculas.Count(matricula =>
+        matricula.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Concluido);
+}
+
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <p class="text-secondary text-uppercase small fw-semibold mb-1">
+                Área do aluno
+            </p>
+
+            <h1 class="h3 mb-1">
+                Olá,
+                <button type="button" class="btn btn-link p-0 align-baseline text-decoration-none"
+                        data-bs-toggle="modal" data-bs-target="#modalPerfilAluno">
+                    @Model.Aluno.Nome
+                </button>
+            </h1>
+
+            <p class="text-secondary mb-0">
+                Acompanhe suas turmas, cursos e resultados acadêmicos.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#modalPerfilAluno">
+                Meu perfil
+            </button>
+
+            <form action="/ModuloUsuario/Apresentacao/Logout" method="post">
+                <button type="submit" class="btn btn-outline-danger">
+                    Sair
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <span class="text-secondary small">Total de matrículas</span>
+                    <strong class="d-block fs-2">@Model.Matriculas.Count</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <span class="text-secondary small">Em andamento</span>
+                    <strong class="d-block fs-2">@matriculasCursando</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <span class="text-secondary small">Concluídas</span>
+                    <strong class="d-block fs-2">@matriculasConcluidas</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-end gap-3 mb-3">
+        <div>
+            <h2 class="h4 mb-1">Minhas turmas</h2>
+            <p class="text-secondary mb-0">
+                Cada turma reúne o curso, professor e seu progresso atual.
+            </p>
+        </div>
+    </div>
+
+    @if (Model.Matriculas.Count == 0)
+    {
+        <div class="alert alert-info">
+            Você ainda não possui matrículas vinculadas ao seu perfil.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var matricula in Model.Matriculas)
+            {
+                string corSituacao = matricula.Situacao switch
+                {
+                    EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Concluido => "text-bg-success",
+                    EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Reprovado => "text-bg-danger",
+                    EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado => "text-bg-secondary",
+                    _ => "text-bg-primary"
+                };
+
+                <div class="col-md-6 col-xl-4">
+                    <article class="card border-0 shadow-sm h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                <div>
+                                    <p class="text-secondary small mb-1">@matricula.Curso.NivelDificuldade</p>
+                                    <h3 class="h5 mb-1">@matricula.Curso.Nome</h3>
+                                    <p class="text-secondary mb-0">@matricula.Turma.Nome</p>
+                                </div>
+
+                                <span class="badge @corSituacao rounded-pill">
+                                    @matricula.Situacao
+                                </span>
+                            </div>
+
+                            <dl class="row small g-2 mb-3">
+                                <dt class="col-5 text-secondary">Período</dt>
+                                <dd class="col-7 mb-0">
+                                    @matricula.Turma.DataInicio.ToString("dd/MM/yyyy")
+                                    a
+                                    @matricula.Turma.DataFim.ToString("dd/MM/yyyy")
+                                </dd>
+
+                                <dt class="col-5 text-secondary">Horário</dt>
+                                <dd class="col-7 mb-0">@matricula.Turma.HorarioTurno</dd>
+
+                                <dt class="col-5 text-secondary">Carga horária</dt>
+                                <dd class="col-7 mb-0">@matricula.Curso.CargaHoraria h</dd>
+
+                                <dt class="col-5 text-secondary">Professor</dt>
+                                <dd class="col-7 mb-0">
+                                    <button type="button" class="btn btn-link btn-sm p-0 align-baseline" data-bs-toggle="modal"
+                                            data-bs-target="#modalProfessor-@matricula.Id">
+                                        @matricula.Professor.Nome
+                                    </button>
+                                </dd>
+                            </dl>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>Progresso da turma</span>
+                                    <span>@matricula.ProgressoCronologicoPercentual%</span>
+                                </div>
+
+                                <div class="progress" role="progressbar" aria-label="Progresso cronológico da turma"
+                                     aria-valuenow="@matricula.ProgressoCronologicoPercentual" aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    <div class="progress-bar" style="width: @matricula.ProgressoCronologicoPercentual%">
+                                    </div>
+                                </div>
+
+                                <p class="text-secondary small mb-0 mt-2">
+                                    Baseado no período da turma. O progresso por conteúdo será fornecido pelo curso.
+                                </p>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center gap-2 mt-auto">
+                                <span class="small text-secondary">
+                                    Nota final:
+                                    <strong>@(matricula.NotaFinal?.ToString("0.00") ?? "-")</strong>
+                                </span>
+
+                                <a asp-action="DetalhesMatricula" asp-route-id="@matricula.Id" class="btn btn-primary btn-sm">
+                                    Abrir turma
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="modal fade" id="modalProfessor-@matricula.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <div>
+                                    <h2 class="modal-title fs-5">@matricula.Professor.Nome</h2>
+                                    <p class="text-secondary small mb-0">Professor da turma</p>
+                                </div>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                                </button>
+                            </div>
+
+                            <div class="modal-body">
+                                <dl class="row g-2 mb-3">
+                                    <dt class="col-4">Email</dt>
+                                    <dd class="col-8 text-break">@(string.IsNullOrWhiteSpace(matricula.Professor.Email) ? "-" :
+                                                                        matricula.Professor.Email)</dd>
+
+                                        <dt class="col-4">Especialidades</dt>
+                                        <dd class="col-8">@(string.IsNullOrWhiteSpace(matricula.Professor.Especialidades) ? "Não informado" : matricula.Professor.Especialidades)</dd>
+                                    </dl>
+
+                                    <h3 class="h6">Biografia profissional</h3>
+                                    <p class="mb-0">
+                                        @(string.IsNullOrWhiteSpace(matricula.Professor.Bio) ? "Biografia não informada." :
+                                matricula.Professor.Bio)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="modal fade" id="modalPerfilAluno" tabindex="-1" aria-labelledby="tituloModalPerfilAluno" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title fs-5" id="tituloModalPerfilAluno">
+                            Perfil do aluno
+                        </h2>
+                        <p class="text-secondary small mb-0">
+                            Dados da sua conta acadêmica.
+                        </p>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome</label>
+                            <input class="form-control" value="@Model.Aluno.Nome" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" value="@Model.Aluno.Email" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Telefone</label>
+                            <input class="form-control" value="@Model.Aluno.Telefone" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Situação da conta</label>
+                            <input class="form-control" value="@(Model.Aluno.Ativo ? "Ativa" : "Inativa")" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
