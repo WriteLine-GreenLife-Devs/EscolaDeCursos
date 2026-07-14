@@ -7,6 +7,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Infra;
 using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 
 namespace EscolaDeCursosWebApp.Compartilhado.Aplicacao;
 
@@ -27,5 +28,8 @@ public static class InjecaoDependencia
         services.AddScoped<ServicoTurma>();
         services.AddScoped<ServicoMatricula>();
         services.AddScoped<ServicoProfessor>();
+        services.AddScoped<ServicoAluno>();
+        services.AddScoped<ServicoNotaAluno>();
+        services.AddScoped<ServicoPresencaAluno>();
     }
 }
