@@ -121,6 +121,24 @@ public sealed class ServicoPresencaAluno : ServicoBase<PresencaAluno>
         if (turma == null || turma.instrutorId != professorId)
             return Falha(nameof(dto.TurmaId), "A turma não pertence a este professor.");
 
+        return SalvarChamada(dto, turma);
+    }
+
+    public Result SalvarChamadaDoAdministrador(SalvarChamadaAlunoDto dto)
+    {
+        Turma? turma = repositorioTurma.SelecionarPorId(dto.TurmaId);
+
+        if (turma == null)
+            return Falha(nameof(dto.TurmaId), "Turma não encontrada.");
+
+        return SalvarChamada(dto, turma);
+    }
+
+    private Result SalvarChamada(
+        SalvarChamadaAlunoDto dto,
+        Turma turma)
+    {
+
         DateTime dataAula = dto.DataAula.Date;
 
         if (dataAula < turma.dataInicio.Date || dataAula > turma.dataFim.Date)

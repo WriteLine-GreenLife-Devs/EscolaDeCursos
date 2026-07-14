@@ -19,19 +19,19 @@
 
     <div class="col-md-2">
         <label class="form-label">Nota 1</label>
-        <input asp-for="Nota1" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
+        <input asp-for="Nota1" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado ? "disabled" : null)" />
     </div>
     <div class="col-md-2">
         <label class="form-label">Nota 2</label>
-        <input asp-for="Nota2" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
+        <input asp-for="Nota2" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado ? "disabled" : null)" />
     </div>
     <div class="col-md-2">
         <label class="form-label">Nota 3</label>
-        <input asp-for="Nota3" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
+        <input asp-for="Nota3" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado ? "disabled" : null)" />
     </div>
     <div class="col-md-2">
         <label class="form-label">Recuperação</label>
-        <input asp-for="Recuperacao" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando ? "disabled" : null)" />
+        <input asp-for="Recuperacao" type="text" inputmode="decimal" class="form-control" disabled="@(Model.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado ? "disabled" : null)" />
     </div>
 
     <div class="col-md-2">
@@ -45,7 +45,7 @@
     </div>
 
     <div class="col-12">
-        @if (Model.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando)
+        @if (Model.Situacao != EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado)
         {
             <button class="btn btn-primary">Salvar Notas</button>
             <a class="btn btn-secondary ms-2" asp-action="VerTurma" asp-route-id="@turmaId">Voltar</a>

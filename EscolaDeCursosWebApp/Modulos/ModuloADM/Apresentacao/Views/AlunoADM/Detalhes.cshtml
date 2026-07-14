@@ -1,0 +1,126 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.DetalhesAlunoADMViewModel
+
+@{
+    Layout = "_LayoutADM";
+    ViewBag.Titulo = "Histórico do Aluno";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">@Model.Nome</h1>
+        <p class="text-secondary mb-0">@Model.Email · @Model.Telefone</p>
+    </div>
+    <div class="d-flex gap-2">
+        <span class="badge @(Model.Ativo ? "text-bg-success" : "text-bg-secondary") align-self-center">
+            @(Model.Ativo ? "Ativo" : "Inativo")
+        </span>
+        <a asp-action="ListarAlunos" class="btn btn-outline-secondary btn-sm">Voltar</a>
+    </div>
+</div>
+
+@if (Model.Matriculas.Count == 0)
+{
+    <div class="alert alert-info">Este aluno ainda não possui matrículas.</div>
+}
+else
+{
+    <div class="vstack gap-4">
+        @foreach (var matricula in Model.Matriculas)
+        {
+            <section class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+                        <div>
+                            <h2 class="h5 mb-1">@matricula.CursoNome</h2>
+                            <span class="text-secondary">@matricula.TurmaNome</span>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="badge text-bg-light">@matricula.Situacao</span>
+                            <a class="btn btn-outline-secondary btn-sm" asp-action="VerTurma" asp-route-id="@matricula.TurmaId">
+                                Ver turma
+                            </a>
+                            <a class="btn btn-outline-primary btn-sm" asp-action="VerNotas"
+                               asp-route-matriculaId="@matricula.Id" asp-route-turmaId="@matricula.TurmaId">
+                                Editar notas
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6 col-xl-3">
+                            <span class="text-secondary small d-block">Matrícula</span>
+                            <strong>@matricula.DataMatricula.ToString("dd/MM/yyyy")</strong>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <span class="text-secondary small d-block">Nota final</span>
+                            <strong>@(matricula.NotaFinal?.ToString("0.00") ?? "-")</strong>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <span class="text-secondary small d-block">Frequência</span>
+                            <strong>
+                                @(matricula.TotalPresencas == 0
+                                    ? "Sem registros"
+                                    : $"{matricula.FrequenciaPercentual}%")
+                            </strong>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <span class="text-secondary small d-block">Presenças</span>
+                            <strong>@matricula.TotalPresentes de @matricula.TotalPresencas</strong>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm text-center align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nota 1</th>
+                                    <th>Nota 2</th>
+                                    <th>Nota 3</th>
+                                    <th>Recuperação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@(matricula.Nota1?.ToString("0.00") ?? "-")</td>
+                                    <td>@(matricula.Nota2?.ToString("0.00") ?? "-")</td>
+                                    <td>@(matricula.Nota3?.ToString("0.00") ?? "-")</td>
+                                    <td>@(matricula.Recuperacao?.ToString("0.00") ?? "-")</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (matricula.Presencas.Count > 0)
+                    {
+                        <details>
+                            <summary class="text-primary">Ver histórico de presença</summary>
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Situação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var presenca in matricula.Presencas)
+                                        {
+                                            <tr>
+                                                <td>@presenca.Data.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    <span class="badge @(presenca.Presente ? "text-bg-success" : "text-bg-danger")">
+                                                        @(presenca.Presente ? "Presente" : "Ausente")
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+}

@@ -197,6 +197,16 @@ public sealed class ServicoNotaAluno : ServicoBase<NotaAluno>
         return SalvarNotas(dto, matricula);
     }
 
+    public Result SalvarNotasDoAdministrador(SalvarNotasAlunoDto dto)
+    {
+        Matricula? matricula = SelecionarMatriculaDoAluno(dto.MatriculaId);
+
+        if (matricula == null)
+            return Falha(nameof(dto.MatriculaId), "Matrícula de aluno não encontrada.");
+
+        return SalvarNotas(dto, matricula);
+    }
+
     private Result SalvarNotas(
         SalvarNotasAlunoDto dto,
         Matricula matricula)

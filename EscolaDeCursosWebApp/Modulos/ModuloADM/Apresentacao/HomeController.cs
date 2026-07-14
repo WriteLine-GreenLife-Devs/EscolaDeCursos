@@ -3,6 +3,7 @@ using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
+using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
@@ -28,13 +29,27 @@ public class ADMController(
     IRepositorioCurso repositorioCurso,
     ServicoTurma servicoTurma,
     IRepositorioTurma repositorioTurma,
-    ServicoMatricula servicoMatricula
+    ServicoMatricula servicoMatricula,
+    IRepositorioMatricula repositorioMatricula,
+    ServicoNotaAluno servicoNotaAluno,
+    ServicoPresencaAluno servicoPresencaAluno
 ) : Controller
 {
     [HttpGet]
     public ActionResult Index()
     {
-        return View();
+        var viewModel = new PainelADMViewModel(
+            repositorioCurso.Filtrar(curso =>
+                curso.status == StatusCurso.Ativo).Count,
+            repositorioTurma.SelecionarTodos().Count,
+            repositorioUsuario.Filtrar(usuario =>
+                usuario.tipoUsuario == TipoUsuario.Aluno && usuario.ativo).Count,
+            repositorioUsuario.Filtrar(usuario =>
+                usuario.tipoUsuario == TipoUsuario.Professor && usuario.ativo).Count,
+            repositorioMatricula.Filtrar(matricula =>
+                matricula.Situacao == SituacaoMatricula.Cursando).Count);
+
+        return View(viewModel);
     }
 
     [HttpGet]
@@ -357,29 +372,95 @@ public class ADMController(
         if (detalhe == null)
             return RedirectToAction("ListarTurmas");
 
+        Turma? turma = repositorioTurma.SelecionarPorId(id);
+
+        if (turma == null)
+            return RedirectToAction("ListarTurmas");
+
+        List<AlunoMatriculaViewModel> matriculas = detalhe.Matriculas
+            .Select(matricula =>
+            {
+                FichaNotasAlunoDto? ficha = servicoNotaAluno
+                    .SelecionarFicha(matricula.MatriculaId);
+
+                List<PresencaAlunoDto> presencas = servicoPresencaAluno
+                    .SelecionarPorMatricula(matricula.MatriculaId);
+
+                int totalPresentes = presencas.Count(presenca =>
+                    presenca.Presente);
+
+                return new AlunoMatriculaViewModel
+                {
+                    MatriculaId = matricula.MatriculaId,
+                    AlunoId = matricula.AlunoId,
+                    AlunoNome = matricula.AlunoNome,
+                    Situacao = ficha?.Situacao ?? matricula.Situacao,
+                    DataMatricula = matricula.DataMatricula,
+                    NotaFinal = ficha?.NotaFinal,
+                    FrequenciaPercentual = presencas.Count == 0
+                        ? 0
+                        : (int)Math.Round(
+                            totalPresentes * 100d / presencas.Count),
+                    TotalPresencas = presencas.Count
+                };
+            })
+            .OrderBy(matricula => matricula.AlunoNome)
+            .ToList();
+
         var alunos = repositorioUsuario.SelecionarTodos()
             .Where(u => u.tipoUsuario == TipoUsuario.Aluno && u.ativo)
+            .Where(u => matriculas.All(matricula =>
+                matricula.AlunoId != u.Id))
             .ToList();
 
         var alunosDisponiveis = alunos
             .Select(a => new { a.Id, a.nome })
             .ToList();
 
-        var vm = new EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.VerTurmaViewModel
+        List<DateTime> datasChamadas = matriculas
+            .SelectMany(matricula => servicoPresencaAluno
+                .SelecionarPorMatricula(matricula.MatriculaId))
+            .Select(presenca => presenca.DataAula.Date)
+            .Distinct()
+            .OrderByDescending(data => data)
+            .ToList();
+
+        var vm = new VerTurmaViewModel
         {
             TurmaId = detalhe.TurmaId,
             TurmaNome = detalhe.TurmaNome,
             InstrutorNome = detalhe.InstrutorNome,
+            DataInicio = turma.dataInicio,
+            DataFim = turma.dataFim,
             VagasMaximas = detalhe.VagasMaximas,
-            Matriculas = detalhe.Matriculas.Select(m => new EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.AlunoMatriculaViewModel
-            {
-                MatriculaId = m.MatriculaId,
-                AlunoId = m.AlunoId,
-                AlunoNome = m.AlunoNome,
-                Situacao = m.Situacao,
-                DataMatricula = m.DataMatricula
-            }).ToList(),
-            AlunosDisponiveis = alunosDisponiveis.Select(a => new EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.SelectAlunoViewModel { AlunoId = a.Id, Nome = a.nome }).ToList()
+            Matriculas = matriculas,
+            AlunosDisponiveis = alunosDisponiveis
+                .Select(aluno => new SelectAlunoViewModel
+                {
+                    AlunoId = aluno.Id,
+                    Nome = aluno.nome
+                })
+                .ToList(),
+            Chamadas = datasChamadas
+                .Select(data => new ChamadaADMViewModel(
+                    data,
+                    matriculas
+                        .Where(matricula =>
+                            matricula.DataMatricula.Date <= data)
+                        .Select(matricula =>
+                        {
+                            PresencaAlunoDto? presenca = servicoPresencaAluno
+                                .SelecionarPorMatricula(matricula.MatriculaId)
+                                .SingleOrDefault(registro =>
+                                    registro.DataAula.Date == data);
+
+                            return new AlunoChamadaADMViewModel(
+                                matricula.MatriculaId,
+                                matricula.AlunoNome,
+                                presenca?.Presente);
+                        })
+                        .ToList()))
+                .ToList()
         };
 
         return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/VerTurma.cshtml", vm);
@@ -412,9 +493,30 @@ public class ADMController(
     [HttpGet]
     public ActionResult VerNotas(Guid matriculaId, Guid turmaId)
     {
-        var ficha = servicoMatricula.ObterFichaNotas(matriculaId);
-        if (ficha == null)
+        FichaNotasAlunoDto? fichaAluno = servicoNotaAluno
+            .SelecionarFicha(matriculaId);
+
+        if (fichaAluno == null)
             return RedirectToAction("VerTurma", new { id = turmaId });
+
+        FichaNotasDto? fichaMatricula = servicoMatricula
+            .ObterFichaNotas(matriculaId);
+
+        if (fichaMatricula == null)
+            return RedirectToAction("VerTurma", new { id = turmaId });
+
+        var ficha = new FichaNotasDto
+        {
+            MatriculaId = fichaAluno.MatriculaId,
+            AlunoId = fichaMatricula.AlunoId,
+            AlunoNome = fichaMatricula.AlunoNome,
+            Nota1 = fichaAluno.Nota1,
+            Nota2 = fichaAluno.Nota2,
+            Nota3 = fichaAluno.Nota3,
+            Recuperacao = fichaAluno.Recuperacao,
+            NotaFinal = fichaAluno.NotaFinal,
+            Situacao = fichaAluno.Situacao
+        };
 
         ViewBag.TurmaId = turmaId;
         return View("~/Modulos/ModuloADM/Apresentacao/Views/TurmaADM/VerNotas.cshtml", ficha);
@@ -451,11 +553,51 @@ public class ADMController(
         if (!ModelState.IsValid)
             return RedirectToAction("VerNotas", new { matriculaId = dto.MatriculaId, turmaId });
 
-        var resultado = servicoMatricula.AtualizarNotas(dto);
+        var resultado = servicoNotaAluno.SalvarNotasDoAdministrador(
+            new SalvarNotasAlunoDto(
+                dto.MatriculaId,
+                dto.Nota1,
+                dto.Nota2,
+                dto.Nota3,
+                dto.Recuperacao));
         if (resultado.IsFailed)
             TempData["MensagemErro"] = resultado.Errors.First().Message;
 
         return RedirectToAction("VerTurma", new { id = turmaId });
+    }
+
+    [HttpPost]
+    public ActionResult SalvarChamada(SalvarChamadaADMViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["MensagemErro"] =
+                "Verifique os dados informados na chamada.";
+
+            return RedirectToAction(
+                "VerTurma",
+                new { id = viewModel.TurmaId });
+        }
+
+        var resultado = servicoPresencaAluno
+            .SalvarChamadaDoAdministrador(
+                new SalvarChamadaAlunoDto(
+                    viewModel.TurmaId,
+                    viewModel.DataAula,
+                    viewModel.Alunos
+                        .Select(aluno => new PresencaChamadaAlunoDto(
+                            aluno.MatriculaId,
+                            aluno.Presente))
+                        .ToList()));
+
+        if (resultado.IsFailed)
+            TempData["MensagemErro"] = resultado.Errors.First().Message;
+        else
+            TempData["MensagemSucesso"] = "Chamada salva com sucesso.";
+
+        return RedirectToAction(
+            "VerTurma",
+            new { id = viewModel.TurmaId });
     }
 
     private static bool TryParseNota(Microsoft.AspNetCore.Http.IFormCollection form, string fieldName, out double? valor)
@@ -623,6 +765,69 @@ public class ADMController(
             .ToList();
 
         return View("~/Modulos/ModuloADM/Apresentacao/Views/AlunoADM/Listar.cshtml", usuarios);
+    }
+
+    [HttpGet]
+    public ActionResult DetalhesAluno(Guid id)
+    {
+        DetalhesAlunoDto? aluno = servicoAluno.SelecionarPorId(id);
+
+        if (aluno == null)
+            return NotFound();
+
+        var viewModel = new DetalhesAlunoADMViewModel
+        {
+            Id = aluno.Id,
+            Nome = aluno.Nome,
+            Email = aluno.Email,
+            Telefone = aluno.Telefone,
+            Ativo = aluno.Ativo,
+            Matriculas = servicoAluno
+                .SelecionarMatriculas(id)
+                .Select(matricula =>
+                {
+                    FichaNotasAlunoDto? ficha = servicoNotaAluno
+                        .SelecionarFicha(matricula.Id);
+
+                    List<PresencaAlunoDto> presencas = servicoPresencaAluno
+                        .SelecionarPorMatricula(matricula.Id);
+
+                    int totalPresentes = presencas.Count(presenca =>
+                        presenca.Presente);
+
+                    return new MatriculaAlunoADMViewModel(
+                        matricula.Id,
+                        matricula.Turma.Id,
+                        matricula.Curso.Nome,
+                        matricula.Turma.Nome,
+                        matricula.DataMatricula,
+                        ficha?.Situacao ?? matricula.Situacao,
+                        ficha?.Nota1,
+                        ficha?.Nota2,
+                        ficha?.Nota3,
+                        ficha?.Recuperacao,
+                        ficha?.NotaFinal,
+                        presencas.Count == 0
+                            ? 0
+                            : (int)Math.Round(
+                                totalPresentes * 100d / presencas.Count),
+                        presencas.Count,
+                        totalPresentes,
+                        presencas
+                            .OrderByDescending(presenca => presenca.DataAula)
+                            .Select(presenca => new PresencaAlunoADMViewModel(
+                                presenca.DataAula,
+                                presenca.Presente))
+                            .ToList());
+                })
+                .OrderBy(matricula => matricula.CursoNome)
+                .ThenBy(matricula => matricula.TurmaNome)
+                .ToList()
+        };
+
+        return View(
+            "~/Modulos/ModuloADM/Apresentacao/Views/AlunoADM/Detalhes.cshtml",
+            viewModel);
     }
 
     [HttpGet]

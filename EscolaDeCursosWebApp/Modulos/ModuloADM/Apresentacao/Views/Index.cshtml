@@ -1,21 +1,57 @@
+@model EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao.PainelADMViewModel
+
 @{
     Layout = "_LayoutADM";
     ViewBag.Titulo = "Área do ADM";
 }
 
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="h3">Bem-vindo, ADM</h1>
-            <p class="text-muted">Esta é a área administrativa.</p>
-            <hr />
-            <div class="list-group">
-                <a class="list-group-item list-group-item-action" asp-controller="ADM" asp-action="ListarAlunos">Gerenciar Alunos</a>
-                <a class="list-group-item list-group-item-action" asp-controller="ADM" asp-action="ListarProfessores">Gerenciar Professores</a>
-                <a class="list-group-item list-group-item-action" asp-controller="ADM" asp-action="ListarCategorias">Gerenciar Categorias</a>
-                <a class="list-group-item list-group-item-action" asp-controller="ADM" asp-action="ListarCursos">Gerenciar Cursos</a>
-                <a class="list-group-item list-group-item-action" asp-controller="ADM" asp-action="ListarTurmas">Gerenciar Turmas</a>
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <span class="text-secondary small">Cursos ativos</span>
+                <strong class="d-block fs-3">@Model.TotalCursosAtivos</strong>
             </div>
         </div>
     </div>
+    <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <span class="text-secondary small">Turmas</span>
+                <strong class="d-block fs-3">@Model.TotalTurmas</strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <span class="text-secondary small">Alunos ativos</span>
+                <strong class="d-block fs-3">@Model.TotalAlunosAtivos</strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <span class="text-secondary small">Professores ativos</span>
+                <strong class="d-block fs-3">@Model.TotalProfessoresAtivos</strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <span class="text-secondary small">Matrículas cursando</span>
+                <strong class="d-block fs-3">@Model.TotalMatriculasCursando</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="list-group shadow-sm">
+    <a class="list-group-item list-group-item-action" asp-action="ListarAlunos">Gerenciar alunos</a>
+    <a class="list-group-item list-group-item-action" asp-action="ListarProfessores">Gerenciar professores</a>
+    <a class="list-group-item list-group-item-action" asp-action="ListarCategorias">Gerenciar categorias</a>
+    <a class="list-group-item list-group-item-action" asp-action="ListarCursos">Gerenciar cursos</a>
+    <a class="list-group-item list-group-item-action" asp-action="ListarTurmas">Gerenciar turmas</a>
 </div>

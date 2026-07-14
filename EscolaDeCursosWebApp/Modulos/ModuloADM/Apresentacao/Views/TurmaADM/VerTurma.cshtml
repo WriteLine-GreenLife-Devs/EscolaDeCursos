@@ -3,75 +3,270 @@
 @{
     Layout = "_LayoutADM";
     ViewBag.Titulo = "Detalhes da Turma";
+
+    DateTime dataMaximaChamada = Model.DataFim.Date < DateTime.Today
+        ? Model.DataFim.Date
+        : DateTime.Today;
+
+    bool chamadaDisponivel = Model.Matriculas.Count > 0 &&
+        dataMaximaChamada >= Model.DataInicio.Date;
 }
 
-<h3>@Model.TurmaNome</h3>
-<p class="small text-muted">Instrutor: @Model.InstrutorNome</p>
-<p class="small text-muted">Vagas: @Model.VagasMaximas</p>
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">@Model.TurmaNome</h1>
+        <p class="text-secondary mb-0">
+            @Model.InstrutorNome · @Model.Matriculas.Count de @Model.VagasMaximas vaga(s)
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaChamada"
+                disabled="@(!chamadaDisponivel)">
+            Fazer chamada
+        </button>
+        <a asp-action="ListarTurmas" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</div>
 
-@if (TempData["MensagemErro"] is string msgErro)
+@if (TempData["MensagemErro"] is string mensagemErro)
 {
-    <div class="alert alert-danger">@msgErro</div>
+    <div class="alert alert-danger">@mensagemErro</div>
 }
 
-<div class="card mb-4">
+@if (TempData["MensagemSucesso"] is string mensagemSucesso)
+{
+    <div class="alert alert-success">@mensagemSucesso</div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
-        <h5 class="card-title">Adicionar aluno</h5>
-        <form asp-action="CadastrarMatricula" method="post" class="row g-2 align-items-center">
-            <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
-            <div class="col-auto">
-                <select name="AlunoId" class="form-select">
-                    <option value="">-- Selecionar aluno --</option>
-                    @foreach(var a in Model.AlunosDisponiveis)
-                    {
-                        <option value="@a.AlunoId">@a.Nome</option>
-                    }
-                </select>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary">Adicionar</button>
-            </div>
-        </form>
+        <h2 class="h5 mb-3">Adicionar aluno</h2>
+
+        @if (Model.AlunosDisponiveis.Count == 0)
+        {
+            <span class="text-secondary">Nenhum aluno disponível para esta turma.</span>
+        }
+        else
+        {
+            <form asp-action="CadastrarMatricula" method="post" class="row g-2 align-items-center">
+                <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
+                <div class="col-md-8 col-xl-5">
+                    <select name="AlunoId" class="form-select" required>
+                        <option value="">Selecione o aluno</option>
+                        @foreach (var aluno in Model.AlunosDisponiveis)
+                        {
+                            <option value="@aluno.AlunoId">@aluno.Nome</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        }
     </div>
 </div>
 
-<div class="card">
+<div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
-        <h5 class="card-title">Alunos matriculados</h5>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Situação</th>
-                    <th>Data</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach(var m in Model.Matriculas)
-                {
-                    <tr>
-                        <td>@m.AlunoNome</td>
-                        <td>@m.Situacao</td>
-                        <td>@m.DataMatricula.ToString("g")</td>
-                        <td>
-                            <a class="btn btn-outline-secondary btn-sm me-1" asp-action="VerNotas" asp-route-matriculaId="@m.MatriculaId" asp-route-turmaId="@Model.TurmaId">Ver Notas</a>
-                            @if (m.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando)
-                            {
-                                <form asp-action="TrancarMatricula" method="post" style="display:inline-block">
-                                    <input type="hidden" name="matriculaId" value="@m.MatriculaId" />
-                                    <input type="hidden" name="turmaId" value="@Model.TurmaId" />
-                                    <button class="btn btn-sm btn-warning">Trancar</button>
-                                </form>
-                            }
-                            else
-                            {
-                                <span class="text-muted">(não editável)</span>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <h2 class="h5 mb-3">Alunos matriculados</h2>
+
+        @if (Model.Matriculas.Count == 0)
+        {
+            <div class="alert alert-info mb-0">Esta turma ainda não possui alunos.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Situação</th>
+                            <th class="text-center">Nota final</th>
+                            <th class="text-center">Frequência</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var matricula in Model.Matriculas)
+                        {
+                            <tr>
+                                <td>
+                                    <strong class="d-block">@matricula.AlunoNome</strong>
+                                    <small class="text-secondary">
+                                        Matrícula em @matricula.DataMatricula.ToString("dd/MM/yyyy")
+                                    </small>
+                                </td>
+                                <td>@matricula.Situacao</td>
+                                <td class="text-center">@(matricula.NotaFinal?.ToString("0.00") ?? "-")</td>
+                                <td class="text-center">
+                                    @(matricula.TotalPresencas == 0
+                                        ? "-"
+                                        : $"{matricula.FrequenciaPercentual}%")
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                                        <a class="btn btn-outline-secondary btn-sm" asp-action="DetalhesAluno"
+                                           asp-route-id="@matricula.AlunoId">
+                                            Ver aluno
+                                        </a>
+                                        <a class="btn btn-outline-primary btn-sm" asp-action="VerNotas"
+                                           asp-route-matriculaId="@matricula.MatriculaId" asp-route-turmaId="@Model.TurmaId">
+                                            Editar notas
+                                        </a>
+                                        @if (matricula.Situacao ==
+                                EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando)
+                                        {
+                                            <form asp-action="TrancarMatricula" method="post">
+                                                <input type="hidden" name="matriculaId" value="@matricula.MatriculaId" />
+                                                <input type="hidden" name="turmaId" value="@Model.TurmaId" />
+                                                <button class="btn btn-outline-warning btn-sm">Trancar</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 </div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+            <h2 class="h5 mb-0">Chamadas</h2>
+            <span class="text-secondary small">@Model.Chamadas.Count registro(s)</span>
+        </div>
+
+        @if (Model.Chamadas.Count == 0)
+        {
+            <div class="alert alert-info mb-0">Nenhuma chamada registrada.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th class="text-center">Presentes</th>
+                            <th class="text-center">Ausentes</th>
+                            <th class="text-center">Sem registro</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var chamada in Model.Chamadas)
+                        {
+                            <tr>
+                                <td>@chamada.Data.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">@chamada.Alunos.Count(aluno => aluno.Presente == true)</td>
+                                <td class="text-center">@chamada.Alunos.Count(aluno => aluno.Presente == false)</td>
+                                <td class="text-center">@chamada.Alunos.Count(aluno => aluno.Presente == null)</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#modalChamada-@chamada.Data.ToString("yyyyMMdd")">
+                                        Editar chamada
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="modalNovaChamada" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form asp-action="SalvarChamada" method="post">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title fs-5">Fazer chamada</h2>
+                        <p class="text-secondary small mb-0">@Model.TurmaNome</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
+                    <div class="mb-4">
+                        <label for="DataNovaChamada" class="form-label">Data da aula</label>
+                        <input id="DataNovaChamada" name="DataAula" type="date" class="form-control"
+                               min="@Model.DataInicio.ToString("yyyy-MM-dd")"
+                               max="@dataMaximaChamada.ToString("yyyy-MM-dd")"
+                               value="@dataMaximaChamada.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="vstack gap-2">
+                        @for (int indice = 0; indice < Model.Matriculas.Count; indice++)
+                        {
+                            <div class="form-check border rounded p-3 ps-5">
+                                <input type="hidden" name="Alunos[@indice].MatriculaId"
+                                       value="@Model.Matriculas[indice].MatriculaId" />
+                                <input class="form-check-input" id="novaChamada-@Model.Matriculas[indice].MatriculaId"
+                                       name="Alunos[@indice].Presente" type="checkbox" value="true" />
+                                <label class="form-check-label w-100"
+                                       for="novaChamada-@Model.Matriculas[indice].MatriculaId">
+                                    @Model.Matriculas[indice].AlunoNome
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary">Salvar chamada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@foreach (var chamada in Model.Chamadas)
+{
+    <div class="modal fade" id="modalChamada-@chamada.Data.ToString("yyyyMMdd")" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <form asp-action="SalvarChamada" method="post">
+                    <div class="modal-header">
+                        <div>
+                            <h2 class="modal-title fs-5">Chamada de @chamada.Data.ToString("dd/MM/yyyy")</h2>
+                            <p class="text-secondary small mb-0">@Model.TurmaNome</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
+                        <input type="hidden" name="DataAula" value="@chamada.Data.ToString("yyyy-MM-dd")" />
+                        <div class="vstack gap-2">
+                            @for (int indice = 0; indice < chamada.Alunos.Count; indice++)
+                            {
+                                <div class="form-check border rounded p-3 ps-5">
+                                    <input type="hidden" name="Alunos[@indice].MatriculaId"
+                                           value="@chamada.Alunos[indice].MatriculaId" />
+                                    <input class="form-check-input"
+                                           id="chamada-@chamada.Data.ToString("yyyyMMdd")-@chamada.Alunos[indice].MatriculaId"
+                                           name="Alunos[@indice].Presente" type="checkbox" value="true"
+                                           checked="@(chamada.Alunos[indice].Presente == true)" />
+                                    <label class="form-check-label w-100"
+                                           for="chamada-@chamada.Data.ToString("yyyyMMdd")-@chamada.Alunos[indice].MatriculaId">
+                                        @chamada.Alunos[indice].Nome
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary">Salvar chamada</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
