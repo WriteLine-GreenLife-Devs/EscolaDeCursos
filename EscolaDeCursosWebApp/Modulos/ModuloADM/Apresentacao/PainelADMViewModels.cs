@@ -1,5 +1,5 @@
-using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
+using EscolaDeCursos.Dominio.Modulos.ModuloMatricula;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 

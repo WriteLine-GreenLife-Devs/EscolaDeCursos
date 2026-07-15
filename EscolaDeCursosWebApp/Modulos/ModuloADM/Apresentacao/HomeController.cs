@@ -1,22 +1,22 @@
-using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
-using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
+using EscolaDeCursos.Aplicacao.Compartilhado;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloConteudoCurso;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloMatricula;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloProfessor;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloAluno;
+using EscolaDeCursos.Dominio.Modulos.ModuloCategoria;
+using EscolaDeCursos.Dominio.Modulos.ModuloMatricula;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloCategoria;
+using EscolaDeCursos.Dominio.Modulos.ModuloUsuario;
+using EscolaDeCursos.Dominio.Modulos.ModuloCurso;
+using EscolaDeCursos.Dominio.Modulos.ModuloTurma;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloCurso;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloTurma;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloUsuario;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 
@@ -505,7 +505,7 @@ public class ADMController(
     [HttpPost]
     public ActionResult TrancarMatricula(Guid matriculaId, Guid turmaId)
     {
-        var dto = new AlterarSituacaoMatriculaDto { MatriculaId = matriculaId, NovaSituacao = Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado };
+        var dto = new AlterarSituacaoMatriculaDto { MatriculaId = matriculaId, NovaSituacao = EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Trancado };
         var resultado = servicoMatricula.AlterarSituacaoMatricula(dto);
         if (resultado.IsFailed)
             TempData["MensagemErro"] = resultado.Errors.First().Message;

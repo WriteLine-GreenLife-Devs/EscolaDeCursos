@@ -1,5 +1,4 @@
-using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
+using EscolaDeCursos.Dominio.Modulos.ModuloTurma;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloADM.Apresentacao;
 

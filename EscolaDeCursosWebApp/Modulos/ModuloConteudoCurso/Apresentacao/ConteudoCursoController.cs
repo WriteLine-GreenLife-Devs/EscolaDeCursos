@@ -1,5 +1,5 @@
 using AutoMapper;
-using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Aplicacao;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloConteudoCurso;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

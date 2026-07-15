@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
+using EscolaDeCursos.Dominio.Modulos.ModuloUsuario;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloUsuario.Apresentacao;
 

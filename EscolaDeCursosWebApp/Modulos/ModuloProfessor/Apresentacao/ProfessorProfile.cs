@@ -1,5 +1,5 @@
 using AutoMapper;
-using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloProfessor;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
 

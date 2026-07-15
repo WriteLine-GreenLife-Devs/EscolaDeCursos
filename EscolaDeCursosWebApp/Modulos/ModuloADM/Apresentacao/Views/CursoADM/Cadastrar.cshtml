@@ -1,4 +1,4 @@
-@model EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao.CadastrarCursoDto
+@model EscolaDeCursos.Aplicacao.Modulos.ModuloCurso.CadastrarCursoDto
 
 @{
     Layout = "_LayoutADM";
@@ -57,7 +57,7 @@
         <label asp-for="categoriaId" class="form-label fw-semibold">Categoria</label>
         <select asp-for="categoriaId" class="form-select">
             <option value="">Selecione...</option>
-            @foreach (var categoria in ViewBag.Categorias as List<EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio.Categoria>)
+            @foreach (var categoria in ViewBag.Categorias as List<EscolaDeCursos.Dominio.Modulos.ModuloCategoria.Categoria>)
             {
                 <option value="@categoria.Id">@categoria.nome</option>
             }

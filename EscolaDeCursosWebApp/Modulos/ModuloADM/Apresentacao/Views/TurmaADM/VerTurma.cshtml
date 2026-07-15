@@ -116,7 +116,7 @@
                                             Editar notas
                                         </a>
                                         @if (matricula.Situacao ==
-                                EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando)
+                                    EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Cursando)
                                         {
                                             <form asp-action="TrancarMatricula" method="post">
                                                 <input type="hidden" name="matriculaId" value="@matricula.MatriculaId" />

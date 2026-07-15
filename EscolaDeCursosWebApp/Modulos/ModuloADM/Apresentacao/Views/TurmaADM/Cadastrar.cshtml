@@ -1,4 +1,4 @@
-@model EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao.CadastrarTurmaDto
+@model EscolaDeCursos.Aplicacao.Modulos.ModuloTurma.CadastrarTurmaDto
 
 @{
     Layout = "_LayoutADM";
@@ -54,7 +54,7 @@
         <label asp-for="cursoId" class="form-label fw-semibold">Curso</label>
         <select asp-for="cursoId" class="form-select">
             <option value="">Selecione...</option>
-            @foreach (var curso in ViewBag.Cursos as List<EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio.Curso>)
+            @foreach (var curso in ViewBag.Cursos as List<EscolaDeCursos.Dominio.Modulos.ModuloCurso.Curso>)
             {
                 <option value="@curso.Id">@curso.nome</option>
             }
@@ -66,7 +66,7 @@
         <label asp-for="instrutorId" class="form-label fw-semibold">Instrutor</label>
         <select asp-for="instrutorId" class="form-select">
             <option value="">Selecione...</option>
-            @foreach (var professor in ViewBag.Professores as List<EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio.Usuario>)
+            @foreach (var professor in ViewBag.Professores as List<EscolaDeCursos.Dominio.Modulos.ModuloUsuario.Usuario>)
             {
                 <option value="@professor.Id">@professor.nome</option>
             }

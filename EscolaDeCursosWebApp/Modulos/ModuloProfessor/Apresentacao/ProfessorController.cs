@@ -1,14 +1,14 @@
 using System.Security.Claims;
 using AutoMapper;
-using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloProfessor.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Aplicacao;
 using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloConteudoCurso;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloProfessor;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloAluno;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloMatricula;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloTurma;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
 
