@@ -1,8 +1,8 @@
-using EscolaDeCursosWebApp.Modulos.ModuloAluno.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
+using EscolaDeCursos.Dominio.Modulos.ModuloMatricula;
+using EscolaDeCursos.Dominio.Modulos.ModuloCurso;
+using EscolaDeCursos.Dominio.Modulos.ModuloAluno;
+using EscolaDeCursos.Dominio.Modulos.ModuloTurma;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloAluno.Apresentacao;
 

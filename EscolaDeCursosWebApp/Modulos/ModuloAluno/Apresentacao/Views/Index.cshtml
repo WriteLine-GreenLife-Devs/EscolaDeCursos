@@ -5,10 +5,10 @@
     ViewBag.Titulo = "Área do Aluno";
 
     int matriculasCursando = Model.Matriculas.Count(matricula =>
-        matricula.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Cursando);
+        matricula.Situacao == EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Cursando);
 
     int matriculasConcluidas = Model.Matriculas.Count(matricula =>
-        matricula.Situacao == EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Concluido);
+        matricula.Situacao == EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Concluido);
 }
 
 <div class="container py-5">
@@ -102,9 +102,9 @@
             {
                 string corSituacao = matricula.Situacao switch
                 {
-                    EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Concluido => "text-bg-success",
-                    EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Reprovado => "text-bg-danger",
-                    EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio.SituacaoMatricula.Trancado => "text-bg-secondary",
+                    EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Concluido => "text-bg-success",
+                    EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Reprovado => "text-bg-danger",
+                    EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Trancado => "text-bg-secondary",
                     _ => "text-bg-primary"
                 };
 

@@ -1,4 +1,4 @@
-@model EscolaDeCursosWebApp.Modulos.ModuloTurma.Aplicacao.EditarTurmaDto
+@model EscolaDeCursos.Aplicacao.Modulos.ModuloTurma.EditarTurmaDto
 
 @{
     Layout = "_LayoutADM";
@@ -45,9 +45,9 @@
     <div class="mb-3">
         <label asp-for="status" class="form-label fw-semibold">Status</label>
         <select asp-for="status" class="form-select">
-            <option value="InscricoesAbertas" selected="@(Model.status == EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio.StatusTurma.InscricoesAbertas ? "selected" : null)">Inscrições Abertas</option>
-            <option value="EmAndamento" selected="@(Model.status == EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio.StatusTurma.EmAndamento ? "selected" : null)">Em Andamento</option>
-            <option value="Concluida" selected="@(Model.status == EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio.StatusTurma.Concluida ? "selected" : null)">Concluída</option>
+            <option value="InscricoesAbertas" selected="@(Model.status == EscolaDeCursos.Dominio.Modulos.ModuloTurma.StatusTurma.InscricoesAbertas ? "selected" : null)">Inscrições Abertas</option>
+            <option value="EmAndamento" selected="@(Model.status == EscolaDeCursos.Dominio.Modulos.ModuloTurma.StatusTurma.EmAndamento ? "selected" : null)">Em Andamento</option>
+            <option value="Concluida" selected="@(Model.status == EscolaDeCursos.Dominio.Modulos.ModuloTurma.StatusTurma.Concluida ? "selected" : null)">Concluída</option>
         </select>
         <span asp-validation-for="status" class="text-danger small fw-semibold"></span>
     </div>
@@ -56,7 +56,7 @@
         <label asp-for="cursoId" class="form-label fw-semibold">Curso</label>
         <select asp-for="cursoId" class="form-select">
             <option value="">Selecione...</option>
-            @foreach (var curso in ViewBag.Cursos as List<EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio.Curso>)
+            @foreach (var curso in ViewBag.Cursos as List<EscolaDeCursos.Dominio.Modulos.ModuloCurso.Curso>)
             {
                 <option value="@curso.Id" selected="@(curso.Id == Model.cursoId ? "selected" : null)">@curso.nome</option>
             }
@@ -68,7 +68,7 @@
         <label asp-for="instrutorId" class="form-label fw-semibold">Instrutor</label>
         <select asp-for="instrutorId" class="form-select">
             <option value="">Selecione...</option>
-            @foreach (var professor in ViewBag.Professores as List<EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio.Usuario>)
+            @foreach (var professor in ViewBag.Professores as List<EscolaDeCursos.Dominio.Modulos.ModuloUsuario.Usuario>)
             {
                 <option value="@professor.Id" selected="@(professor.Id == Model.instrutorId ? "selected" : null)">@professor.nome</option>
             }

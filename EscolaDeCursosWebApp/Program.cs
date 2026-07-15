@@ -1,12 +1,12 @@
-using EscolaDeCursosWebApp.Compartilhado.Aplicacao;
+using EscolaDeCursos.Aplicacao.Compartilhado;
 using EscolaDeCursosWebApp.Compartilhado.Apresentacao;
-using EscolaDeCursosWebApp.Compartilhado.Infra;
-using EscolaDeCursosWebApp.Compartilhado.Infra.Orm;
-using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
+using EscolaDeCursos.Infra.Compartilhado;
+using EscolaDeCursos.Infra.Compartilhado.Orm;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Security.Claims;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloUsuario;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +18,7 @@ if(builder.Environment.IsDevelopment())
 // Configuração do container de injeção de dependência
 builder.Services.AddInfraRepositories(builder.Configuration);
 
-builder.Services.AddApplicationServices(builder.Configuration, builder.Logging);
+builder.Services.AddApplicationServices();
 
 builder.Services.AddPresentationConfig(builder.Configuration);
 

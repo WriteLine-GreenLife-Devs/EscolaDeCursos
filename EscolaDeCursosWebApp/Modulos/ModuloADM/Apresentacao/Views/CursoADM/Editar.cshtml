@@ -1,4 +1,4 @@
-@model EscolaDeCursosWebApp.Modulos.ModuloCurso.Aplicacao.EditarCursoDto
+@model EscolaDeCursos.Aplicacao.Modulos.ModuloCurso.EditarCursoDto
 
 @{
     Layout = "_LayoutADM";
@@ -75,7 +75,7 @@
         <select asp-for="categoriaId" class="form-select">
             <option value="">Selecione...</option>
             @foreach (var categoria in ViewBag.Categorias as
-            List<EscolaDeCursosWebApp.Modulos.ModuloCategoria.Dominio.Categoria>)
+            List<EscolaDeCursos.Dominio.Modulos.ModuloCategoria.Categoria>)
             {
                 <option value="@categoria.Id" selected="@(categoria.Id == Model.categoriaId ? "selected" : null)">
                     @categoria.nome</option>

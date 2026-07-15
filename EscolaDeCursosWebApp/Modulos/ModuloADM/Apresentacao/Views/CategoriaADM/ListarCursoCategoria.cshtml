@@ -37,12 +37,12 @@ else
                         <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                             <h5 class="card-title mb-0" data-search-name>@curso.Nome</h5>
                             <div class="d-flex flex-column align-items-end gap-2">
-                                <span class="badge text-bg-@((curso.Status == EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio.StatusCurso.Ativo) ? "success" : "secondary") rounded-pill">
+                                <span class="badge text-bg-@((curso.Status == EscolaDeCursos.Dominio.Modulos.ModuloCurso.StatusCurso.Ativo) ? "success" : "secondary") rounded-pill">
                                     @curso.Status
                                 </span>
                                 <span class="badge rounded-pill @(
-                                    curso.NivelDificuldade == EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio.NivelDificuldade.Iniciante ? "bg-primary" :
-                                    curso.NivelDificuldade == EscolaDeCursosWebApp.Modulos.ModuloCurso.Dominio.NivelDificuldade.Intermediario ? "bg-warning text-dark" :
+                                    curso.NivelDificuldade == EscolaDeCursos.Dominio.Modulos.ModuloCurso.NivelDificuldade.Iniciante ? "bg-primary" :
+                                    curso.NivelDificuldade == EscolaDeCursos.Dominio.Modulos.ModuloCurso.NivelDificuldade.Intermediario ? "bg-warning text-dark" :
                                     "bg-danger"
                                 )">
                                     @curso.NivelDificuldade

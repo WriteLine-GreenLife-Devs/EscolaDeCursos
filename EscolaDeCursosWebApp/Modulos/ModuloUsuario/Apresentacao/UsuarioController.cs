@@ -1,13 +1,13 @@
 using AutoMapper;
 using EscolaDeCursosWebApp.Compartilhado.Apresentacao.Extensions;
-using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Aplicacao;
-using EscolaDeCursosWebApp.Modulos.ModuloUsuario.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloAluno.Aplicacao;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloAluno;
+using EscolaDeCursos.Aplicacao.Modulos.ModuloUsuario;
+using EscolaDeCursos.Dominio.Modulos.ModuloUsuario;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloUsuario.Apresentacao;
 

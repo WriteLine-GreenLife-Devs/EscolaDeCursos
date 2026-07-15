@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using EscolaDeCursosWebApp.Modulos.ModuloMatricula.Dominio;
-using EscolaDeCursosWebApp.Modulos.ModuloTurma.Dominio;
 using EscolaDeCursosWebApp.Modulos.ModuloConteudoCurso.Apresentacao;
+using EscolaDeCursos.Dominio.Modulos.ModuloMatricula;
+using EscolaDeCursos.Dominio.Modulos.ModuloTurma;
 
 namespace EscolaDeCursosWebApp.Modulos.ModuloProfessor.Apresentacao;
 
