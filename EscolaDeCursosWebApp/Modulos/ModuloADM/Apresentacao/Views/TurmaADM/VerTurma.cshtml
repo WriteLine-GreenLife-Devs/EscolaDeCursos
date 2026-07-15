@@ -21,7 +21,7 @@
     </div>
     <div class="d-flex gap-2">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaChamada"
-                disabled="@(!chamadaDisponivel)">
+                disabled="@(chamadaDisponivel ? null : "disabled")">
             Fazer chamada
         </button>
         <a asp-action="ListarTurmas" class="btn btn-outline-secondary">Voltar</a>
@@ -208,6 +208,7 @@
                             <div class="form-check border rounded p-3 ps-5">
                                 <input type="hidden" name="Alunos[@indice].MatriculaId"
                                        value="@Model.Matriculas[indice].MatriculaId" />
+                                <input type="hidden" name="Alunos[@indice].Presente" value="false" />
                                 <input class="form-check-input" id="novaChamada-@Model.Matriculas[indice].MatriculaId"
                                        name="Alunos[@indice].Presente" type="checkbox" value="true" />
                                 <label class="form-check-label w-100"
@@ -249,6 +250,7 @@
                                 <div class="form-check border rounded p-3 ps-5">
                                     <input type="hidden" name="Alunos[@indice].MatriculaId"
                                            value="@chamada.Alunos[indice].MatriculaId" />
+                                    <input type="hidden" name="Alunos[@indice].Presente" value="false" />
                                     <input class="form-check-input"
                                            id="chamada-@chamada.Data.ToString("yyyyMMdd")-@chamada.Alunos[indice].MatriculaId"
                                            name="Alunos[@indice].Presente" type="checkbox" value="true"

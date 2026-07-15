@@ -26,7 +26,7 @@
         </div>
 
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaChamada"
-                disabled="@(!chamadaDisponivel)">
+                disabled="@(chamadaDisponivel ? null : "disabled")">
             Fazer chamada
         </button>
     </div>
@@ -125,9 +125,9 @@
                                                 Ver aluno
                                             </button>
 
-                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                                     data-bs-target="#modalNotas-@aluno.MatriculaId"
-                                                    disabled="@(aluno.Situacao == EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Trancado)">
+                                                    disabled="@(aluno.Situacao == EscolaDeCursos.Dominio.Modulos.ModuloMatricula.SituacaoMatricula.Trancado ? "disabled" : null)">
                                                 Editar notas
                                             </button>
                                         </div>
@@ -228,6 +228,7 @@
                             <div class="form-check border rounded p-3 ps-5">
                                 <input type="hidden" name="Alunos[@indice].MatriculaId"
                                        value="@Model.Alunos[indice].MatriculaId" />
+                                <input type="hidden" name="Alunos[@indice].Presente" value="false" />
                                 <input class="form-check-input" id="novaChamada-@Model.Alunos[indice].MatriculaId"
                                        name="Alunos[@indice].Presente" type="checkbox" value="true" />
                                 <label class="form-check-label w-100" for="novaChamada-@Model.Alunos[indice].MatriculaId">
@@ -278,6 +279,7 @@
                                 <div class="form-check border rounded p-3 ps-5">
                                     <input type="hidden" name="Alunos[@indice].MatriculaId"
                                            value="@chamada.Alunos[indice].MatriculaId" />
+                                    <input type="hidden" name="Alunos[@indice].Presente" value="false" />
                                     <input class="form-check-input"
                                            id="chamada-@chamada.Data.ToString("yyyyMMdd")-@chamada.Alunos[indice].MatriculaId"
                                            name="Alunos[@indice].Presente" type="checkbox" value="true"
